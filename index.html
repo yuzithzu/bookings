@@ -1,130 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📦 Booking App - Send to Viber</title>
-  <style>
-    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body { margin: 0; display: flex; height: 100vh; background: #f4f6f9; }
-    .sidebar {
-      width: 230px; background: #0d6efd; color: white;
-      display: flex; flex-direction: column; align-items: center; padding: 20px 0;
-    }
-    .sidebar h2 { font-size: 20px; margin-bottom: 40px; }
-    .nav-item { width: 100%; text-align: center; padding: 12px 0; cursor: pointer; transition: 0.2s; }
-    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.15); }
-    .main { flex: 1; padding: 40px; overflow-y: auto; }
-    h1 { color: #0d6efd; text-align: center; margin-bottom: 25px; }
-    form {
-      background: #fff; padding: 25px 30px; border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 800px; margin: auto;
-    }
-    label { font-weight: 600; margin-top: 15px; display: block; }
-    input, textarea, select {
-      width: 100%; padding: 10px; margin-top: 6px;
-      border: 1px solid #ccc; border-radius: 8px; font-size: 14px;
-    }
-    input:focus, textarea:focus { border-color: #0d6efd; outline: none; }
-    .btn {
-      width: 100%; background: #0d6efd; color: white; border: none;
-      border-radius: 8px; padding: 12px; font-size: 16px; cursor: pointer;
-      margin-top: 25px; transition: 0.2s;
-    }
-    .btn:hover { background: #094fc0; }
-    #viberFallback {
-      display: none; text-align: center; margin-top: 15px;
-    }
-    #viberFallback a {
-      display: inline-block;
-      padding: 10px 20px;
-      background: #25d366;
-      color: white;
-      border-radius: 8px;
-      text-decoration: none;
-    }
-    #viberFallback a:hover {
-      background: #1aa654;
-    }
-    @media (max-width: 768px) {
-      body { flex-direction: column; }
-      .sidebar { flex-direction: row; width: 100%; justify-content: space-around; }
-      .main { padding: 20px; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>📦 Booking Form - Send to Viber</title>
+<style>
+  body { font-family: 'Poppins', sans-serif; background: #f6f8fa; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; }
+  h1 { color: #0d6efd; margin-top: 30px; }
+  form { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 3px 12px rgba(0,0,0,0.1); margin-top: 20px; }
+  label { display: block; margin-top: 15px; font-weight: 600; }
+  input, textarea, select {
+    width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px;
+  }
+  .btn {
+    width: 100%; background: #0d6efd; color: white; border: none;
+    padding: 12px; border-radius: 8px; font-size: 16px; margin-top: 20px; cursor: pointer;
+  }
+  .btn:hover { background: #094fc0; }
+  #viberFallback {
+    display: none; text-align: center; margin-top: 20px;
+  }
+  #viberFallback a {
+    display: inline-block;
+    background: #7360f2;
+    color: white; padding: 12px 20px;
+    border-radius: 8px; text-decoration: none; font-weight: 600;
+  }
+</style>
 </head>
 <body>
 
-  <div class="sidebar">
-    <h2>📦 Booking App</h2>
-    <div class="nav-item active">New Booking</div>
-    <div class="nav-item">History</div>
-    <div class="nav-item">Settings</div>
-  </div>
+<h1>📦 Booking Form</h1>
 
-  <div class="main">
-    <h1>Booking Form</h1>
-    <form id="bookingForm">
-      <label>Name of Account (MD/Patient):</label>
-      <input type="text" id="name" required>
+<form id="bookingForm">
+  <label>Name of Account (MD/Patient):</label>
+  <input type="text" id="name" required>
 
-      <label>Contact Number:</label>
-      <input type="tel" id="contact" required>
+  <label>Contact Number:</label>
+  <input type="tel" id="contact" required>
 
-      <label>Delivery Option:</label>
-      <select id="delivery">
-        <option>Pick-Up (by client at office)</option>
-        <option>Delivery (by branch rider to client)</option>
-        <option selected>Pick-Up by Lalamove / Grab / Courier</option>
-      </select>
+  <label>Delivery Option:</label>
+  <select id="delivery">
+    <option>Pick-Up (by client at office)</option>
+    <option>Delivery (by branch rider to client)</option>
+    <option selected>Pick-Up by Lalamove / Grab / Courier</option>
+  </select>
 
-      <label>Pick-Up / Delivery Address:</label>
-      <textarea id="address" rows="2"></textarea>
+  <label>Pick-Up / Delivery Address:</label>
+  <textarea id="address" rows="2"></textarea>
 
-      <label>Preferred Date & Time:</label>
-      <input type="date" id="date"> <input type="time" id="time">
+  <label>Preferred Date & Time:</label>
+  <input type="date" id="date"> <input type="time" id="time">
 
-      <label>Order Details:</label>
-      <textarea id="order" rows="3" placeholder="BRAND / GENERIC / QTY / DISCOUNT"></textarea>
+  <label>Order Details:</label>
+  <textarea id="order" rows="3" placeholder="BRAND / GENERIC / QTY / DISCOUNT"></textarea>
 
-      <label>Total Amount (₱):</label>
-      <input type="number" id="total">
+  <label>Total Amount (₱):</label>
+  <input type="number" id="total">
 
-      <label>Distributor & Branch:</label>
-      <input type="text" id="distributor">
+  <label>Distributor & Branch:</label>
+  <input type="text" id="distributor">
 
-      <label>Remarks / Special Instructions:</label>
-      <textarea id="remarks" rows="3"></textarea>
+  <label>Remarks / Special Instructions:</label>
+  <textarea id="remarks" rows="3"></textarea>
 
-      <button class="btn" type="submit">Send to Viber</button>
-    </form>
+  <button class="btn" type="submit">Send to Viber</button>
+</form>
 
-    <div id="viberFallback">
-      <p>🔗 If Viber did not open automatically, tap below:</p>
-      <a id="manualViberLink" href="#" target="_blank">📱 Open in Viber</a>
-    </div>
-  </div>
+<div id="viberFallback">
+  <p>⚠️ Safari users: Tap below to open Viber manually.</p>
+  <a id="manualViberLink" href="#" target="_blank">📱 Open in Viber</a>
+</div>
 
-  <script>
-    const form = document.getElementById('bookingForm');
-    const fallbackDiv = document.getElementById('viberFallback');
-    const manualLink = document.getElementById('manualViberLink');
+<script>
+  const form = document.getElementById('bookingForm');
+  const fallback = document.getElementById('viberFallback');
+  const manualLink = document.getElementById('manualViberLink');
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-      const name = document.getElementById('name').value.trim();
-      const contact = document.getElementById('contact').value.trim();
-      const delivery = document.getElementById('delivery').value;
-      const address = document.getElementById('address').value.trim();
-      const date = document.getElementById('date').value;
-      const time = document.getElementById('time').value;
-      const order = document.getElementById('order').value.trim();
-      const total = document.getElementById('total').value.trim();
-      const distributor = document.getElementById('distributor').value.trim();
-      const remarks = document.getElementById('remarks').value.trim();
+    const phone = "+639568663952"; // <-- your public Viber number
 
-      const message = 
+    const name = document.getElementById('name').value.trim();
+    const contact = document.getElementById('contact').value.trim();
+    const delivery = document.getElementById('delivery').value;
+    const address = document.getElementById('address').value.trim();
+    const date = document.getElementById('date').value;
+    const time = document.getElementById('time').value;
+    const order = document.getElementById('order').value.trim();
+    const total = document.getElementById('total').value.trim();
+    const distributor = document.getElementById('distributor').value.trim();
+    const remarks = document.getElementById('remarks').value.trim();
+
+    const message = 
 `📦 *New Booking Form*
 👤 Name: ${name}
 📞 Contact: ${contact}
@@ -136,26 +105,26 @@
 🏢 Distributor: ${distributor}
 📝 Remarks: ${remarks}`;
 
-      const phone = "+639568663952"; // ✅ fixed public Viber number
-      const viberLink = `viber://chat?number=${phone}&text=${encodeURIComponent(message)}`;
+    const encoded = encodeURIComponent(message);
+    const viberLink = `viber://chat?number=${phone}&text=${encoded}`;
+    const viberMe = `https://msng.link/o/?${phone.replace('+', '')}=vi`;
 
-      manualLink.href = viberLink;
+    manualLink.href = viberMe; // fallback for Safari
 
-      // Try to open Viber automatically
-      let opened = false;
-      try {
-        window.location.href = viberLink;
-        opened = true;
-      } catch (err) {
-        opened = false;
-      }
-
-      // Show fallback after 1.5s if not opened (iPhone/Safari)
+    // Try auto-open Viber
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isIOS) {
+      // iPhone users → show fallback button instead of forcing auto open
+      fallback.style.display = 'block';
+    } else {
+      // Android & Desktop → open automatically
+      window.location.href = viberLink;
       setTimeout(() => {
-        fallbackDiv.style.display = 'block';
+        fallback.style.display = 'block';
       }, 1500);
-    });
-  </script>
+    }
+  });
+</script>
 
 </body>
 </html>
