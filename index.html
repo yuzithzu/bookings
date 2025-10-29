@@ -8,14 +8,14 @@
     * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
     body { margin: 0; display: flex; height: 100vh; background: #f4f6f9; }
     .sidebar {
-      width: 230px; background: #0d6efd; color: white;
+      width: 230px; background: var(--sidebar-color, #0d6efd); color: white;
       display: flex; flex-direction: column; align-items: center; padding: 20px 0;
     }
     .sidebar h2 { font-size: 20px; margin-bottom: 40px; }
     .nav-item { width: 100%; text-align: center; padding: 12px 0; cursor: pointer; transition: 0.2s; }
     .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.15); }
     .main { flex: 1; padding: 30px; overflow-y: auto; }
-    h1 { color: #0d6efd; text-align: center; margin-bottom: 20px; }
+    h1 { color: var(--main-color, #0d6efd); text-align: center; margin-bottom: 20px; }
     form {
       background: #fff; padding: 20px; border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 900px; margin: auto;
@@ -25,20 +25,20 @@
       width: 100%; padding: 8px; margin-top: 6px;
       border: 1px solid #ccc; border-radius: 8px; font-size: 14px;
     }
-    input:focus, textarea:focus, select:focus { border-color: #0d6efd; outline: none; }
+    input:focus, textarea:focus, select:focus { border-color: var(--main-color, #0d6efd); outline: none; }
     .btn {
-      width: 100%; background: #0d6efd; color: white; border: none;
+      width: 100%; background: var(--btn-color, #0d6efd); color: white; border: none;
       border-radius: 8px; padding: 10px; font-size: 16px; cursor: pointer;
       margin-top: 15px; transition: 0.2s;
     }
-    .btn:hover { background: #094fc0; }
+    .btn:hover { opacity: 0.9; }
     table {
       width: 100%; border-collapse: collapse; margin-top: 15px;
     }
     th, td {
       border: 1px solid #ddd; padding: 6px; font-size: 13px; text-align: center;
     }
-    th { background: #0d6efd; color: white; }
+    th { background: var(--main-color, #0d6efd); color: white; }
     .summary-container {
       background: #fff; padding: 15px; border-radius: 10px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -53,6 +53,7 @@
     }
     .record h4 {
       margin: 0 0 5px;
+      color: var(--main-color, #0d6efd);
     }
     .record table th, .record table td {
       border: 1px solid #ddd;
@@ -65,9 +66,34 @@
       padding: 4px 8px; border-radius: 6px; cursor: pointer;
     }
     .delete-btn:hover { background: #b02a37; }
+
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+        height: auto;
+      }
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 10px 0;
+      }
+      .sidebar h2 { font-size: 18px; margin: 0; }
+      .nav-item { padding: 10px; font-size: 14px; }
+      .main { padding: 15px; }
+      form {
+        width: 100%;
+        box-shadow: none;
+        padding: 15px;
+        border-radius: 0;
+      }
+      table, .record table { font-size: 11px; }
+    }
+
     @media print {
       body { background: white; }
-      .sidebar, .btn, .delete-btn { display: none; }
+      .sidebar, .btn, .delete-btn, .settings { display: none; }
       .main { padding: 0; }
       .summary-container { max-height: none; overflow: visible; }
     }
@@ -154,6 +180,16 @@
       <button type="button" class="btn" id="downloadPDF">📄 Save as PDF</button>
     </form>
 
+    <div class="settings" style="display:none; margin-top:20px; text-align:center;">
+      <label for="themeSelect" style="color:white;">Choose Theme:</label>
+      <select id="themeSelect" style="padding:5px; border-radius:5px;">
+        <option value="default">Blue (Default)</option>
+        <option value="black">Black</option>
+        <option value="red">Red</option>
+        <option value="yellow">Yellow</option>
+      </select>
+    </div>
+
     <div class="summary-container" id="summaryContainer">
       <h3>Saved Bookings</h3>
       <div id="recordList"></div>
@@ -173,11 +209,17 @@
     const termsDaysInput = document.getElementById('termsDays');
     const bankNameInput = document.getElementById('bankName');
 
+    const navItems = document.querySelectorAll('.nav-item');
+    const settingsDiv = document.querySelector('.settings');
+    const themeSelect = document.getElementById('themeSelect');
+
+    // PAYMENT SHOW/HIDE
     paymentSelect.addEventListener('change', () => {
       termsDaysContainer.style.display = paymentSelect.value === 'Terms' ? 'block' : 'none';
       bankContainer.style.display = paymentSelect.value === 'Bank' ? 'block' : 'none';
     });
 
+    // ADD ROW
     function addRow() {
       const row = document.createElement('tr');
       row.innerHTML = `
@@ -196,6 +238,7 @@
       updateTotals();
     }
 
+    // UPDATE TOTALS
     function updateTotals() {
       let grandTotal = 0;
       document.querySelectorAll('#orderBody tr').forEach(row => {
@@ -226,32 +269,79 @@
 
     addRowBtn.addEventListener('click', addRow);
 
-    // ✅ UPDATED loadRecords() with detailed summary
+    // NAVIGATION
+    navItems.forEach(item => {
+      item.addEventListener('click', () => {
+        navItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        settingsDiv.style.display = item.textContent.trim() === 'Settings' ? 'block' : 'none';
+      });
+    });
+
+    // LOAD THEME
+    const savedTheme = localStorage.getItem('theme') || 'default';
+    themeSelect.value = savedTheme;
+    applyTheme(savedTheme);
+
+    themeSelect.addEventListener('change', () => {
+      const theme = themeSelect.value;
+      localStorage.setItem('theme', theme);
+      applyTheme(theme);
+    });
+
+    function applyTheme(theme) {
+      switch(theme) {
+        case 'black':
+          document.documentElement.style.setProperty('--main-color', '#000000');
+          document.documentElement.style.setProperty('--sidebar-color', '#333');
+          document.documentElement.style.setProperty('--btn-color', '#555');
+          break;
+        case 'red':
+          document.documentElement.style.setProperty('--main-color', '#dc3545');
+          document.documentElement.style.setProperty('--sidebar-color', '#a71d2a');
+          document.documentElement.style.setProperty('--btn-color', '#c82333');
+          break;
+        case 'yellow':
+          document.documentElement.style.setProperty('--main-color', '#ffc107');
+          document.documentElement.style.setProperty('--sidebar-color', '#e0a800');
+          document.documentElement.style.setProperty('--btn-color', '#ffca2c');
+          break;
+        default: // blue
+          document.documentElement.style.setProperty('--main-color', '#0d6efd');
+          document.documentElement.style.setProperty('--sidebar-color', '#0d6efd');
+          document.documentElement.style.setProperty('--btn-color', '#0d6efd');
+      }
+
+      document.querySelector('.sidebar').style.background = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-color');
+      document.querySelectorAll('.btn').forEach(b => b.style.background = getComputedStyle(document.documentElement).getPropertyValue('--btn-color'));
+      document.querySelector('h1').style.color = getComputedStyle(document.documentElement).getPropertyValue('--main-color');
+      document.querySelectorAll('th').forEach(th => th.style.background = getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
+      document.querySelectorAll('.record h4').forEach(h => h.style.color = getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
+    }
+
+    // LOAD RECORDS (DETAILED)
     function loadRecords() {
       const records = JSON.parse(localStorage.getItem('bookings')) || [];
       summary.innerHTML = '';
-
       if (records.length === 0) {
         summary.innerHTML = `<p style="text-align:center; color:#666;">No saved bookings yet.</p>`;
         return;
       }
-
       records.forEach((rec, index) => {
         const div = document.createElement('div');
         div.classList.add('record');
         div.innerHTML = `
-          <h4 style="color:#0d6efd; margin-bottom:6px;">${rec.name}</h4>
-          <p style="margin:3px 0;"><strong>📞 Contact:</strong> ${rec.contact}</p>
-          <p style="margin:3px 0;"><strong>🚚 Delivery:</strong> ${rec.delivery}</p>
-          <p style="margin:3px 0;"><strong>📍 Address:</strong> ${rec.address || 'N/A'}</p>
-          <p style="margin:3px 0;"><strong>📅 Schedule:</strong> ${rec.date || 'N/A'} ${rec.time || ''}</p>
-          <p style="margin:3px 0;"><strong>💳 Payment:</strong> ${rec.payment}</p>
-          <p style="margin:3px 0;"><strong>🏢 Distributor:</strong> ${rec.distributor || 'N/A'}</p>
-          <p style="margin:3px 0;"><strong>🗒 Remarks:</strong> ${rec.remarks || 'None'}</p>
-
+          <h4>${rec.name}</h4>
+          <p><strong>📞 Contact:</strong> ${rec.contact}</p>
+          <p><strong>🚚 Delivery:</strong> ${rec.delivery}</p>
+          <p><strong>📍 Address:</strong> ${rec.address || 'N/A'}</p>
+          <p><strong>📅 Schedule:</strong> ${rec.date || 'N/A'} ${rec.time || ''}</p>
+          <p><strong>💳 Payment:</strong> ${rec.payment}</p>
+          <p><strong>🏢 Distributor:</strong> ${rec.distributor || 'N/A'}</p>
+          <p><strong>🗒 Remarks:</strong> ${rec.remarks || 'None'}</p>
           <table style="width:100%; border-collapse:collapse; margin-top:8px;">
             <thead>
-              <tr style="background:#0d6efd; color:white;">
+              <tr style="background:var(--main-color,#0d6efd); color:white;">
                 <th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Disc %</th><th>Total</th><th>Remarks</th>
               </tr>
             </thead>
@@ -269,10 +359,7 @@
               `).join('')}
             </tbody>
           </table>
-
-          <p style="text-align:right; font-weight:700; margin-top:8px;">
-            Total Amount: ₱${rec.total}
-          </p>
+          <p style="text-align:right; font-weight:700; margin-top:8px;">Total Amount: ₱${rec.total}</p>
           <button class="delete-btn" onclick="deleteRecord(${index})">🗑 Delete</button>
         `;
         summary.appendChild(div);
