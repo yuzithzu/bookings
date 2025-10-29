@@ -196,8 +196,8 @@ function addRow() {
       <select class="unit" style="width:70px;">
         <option value="pcs">Pcs</option>
         <option value="box">Box</option>
-        <option value="pfs">Pfs</option>
-        <option value="vial">Vial(s)</option>
+        <option value="pack">Pack</option>
+        <option value="tabs">Tabs</option>
       </select>
     </td>
     <td><input type="number" class="srp" min="0" value="0"></td>
@@ -364,38 +364,54 @@ loadRecords();
 }
 
 // === DOWNLOAD PDF PER TRANSACTION ===
-function downloadPDF(index){
-const records=JSON.parse(localStorage.getItem('bookings'))||[];
-const rec=records[index];
-const { jsPDF } = window.jspdf;
-const doc = new jsPDF();
-let y=20;
-doc.setFontSize(14);
-doc.text(`Booking for ${rec.name}`,20,y); y+=10;
-doc.setFontSize(11);
-doc.text(`Contact: ${rec.contact}`,20,y); y+=6;
-doc.text(`Delivery: ${rec.delivery}`,20,y); y+=6;
-doc.text(`Address: ${rec.address || 'N/A'}`,20,y); y+=6;
-doc.text(`Date: ${rec.date} ${rec.time}`,20,y); y+=6;
-doc.text(`Payment: ${rec.payment}`,20,y); y+=6;
-doc.text(`Distributor: ${rec.distributor}`,20,y); y+=6;
-doc.text(`Remarks: ${rec.remarks || 'None'}`,20,y); y+=10;
+function downloadPDF(index) {
+    const records = JSON.parse(localStorage.getItem('bookings')) || [];
+    const rec = records[index];
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    let y = 20;
 
-const tableData = rec.items.map(item=>[
-item.generic,item.brand,item.qty,item.unit,item.srp,item.discountType,item.discount,item.discountAmt,item.total,item.remarks
-]);
+    // Header
+    doc.setFontSize(14);
+    doc.text(`Booking for ${rec.name}`, 20, y); y += 10;
 
-doc.autoTable({
-head:[['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']],
-body:tableData,
-startY:y
-});
-y=doc.lastAutoTable.finalY+10;
-doc.text(`Total Amount: ₱${rec.total}`,140,y);
-doc.save(`Booking_${rec.name}_${rec.date}.pdf`);
+    doc.setFontSize(11);
+    doc.text(`Contact: ${rec.contact}`, 20, y); y += 6;
+    doc.text(`Delivery: ${rec.delivery}`, 20, y); y += 6;
+    doc.text(`Address: ${rec.address || 'N/A'}`, 20, y); y += 6;
+    doc.text(`Date: ${rec.date} ${rec.time}`, 20, y); y += 6;
+    doc.text(`Payment: ${rec.payment}`, 20, y); y += 6;
+    doc.text(`Distributor: ${rec.distributor}`, 20, y); y += 6;
+    doc.text(`Remarks: ${rec.remarks || 'None'}`, 20, y); y += 10;
+
+    // Prepare table data
+    const tableData = rec.items.map(item => [
+        item.generic, item.brand, item.qty, item.unit, item.srp,
+        item.discountType, item.discount, item.discountAmt, item.total, item.remarks
+    ]);
+
+    // Auto-table: fit to page width
+    doc.autoTable({
+        head: [['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']],
+        body: tableData,
+        startY: y,
+        theme: 'grid',
+        styles: {
+            fontSize: 9,          // smaller font to fit
+            cellPadding: 2
+        },
+        headStyles: { fillColor: [220, 220, 220] },
+        margin: { left: 10, right: 10 },
+        tableWidth: 'auto'
+    });
+
+    // Total amount at bottom right
+    const finalY = doc.lastAutoTable.finalY;
+    doc.setFontSize(12);
+    doc.text(`Total Amount: ₱${rec.total}`, 140, finalY + 10);
+
+    doc.save(`Booking_${rec.name}_${rec.date}.pdf`);
 }
-
-loadRecords();
 </script>
 </div>
 </body>
