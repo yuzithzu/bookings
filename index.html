@@ -372,10 +372,10 @@ function downloadPDF(index) {
     let y = 20;
 
     // Header
-    doc.setFontSize(14);
+    doc.setFontSize(8);
     doc.text(`Booking for ${rec.name}`, 20, y); y += 10;
 
-    doc.setFontSize(11);
+    doc.setFontSize(8);
     doc.text(`Contact: ${rec.contact}`, 20, y); y += 6;
     doc.text(`Delivery: ${rec.delivery}`, 20, y); y += 6;
     doc.text(`Address: ${rec.address || 'N/A'}`, 20, y); y += 6;
@@ -397,7 +397,7 @@ function downloadPDF(index) {
         startY: y,
         theme: 'grid',
         styles: {
-            fontSize: 9,          // smaller font to fit
+            fontSize: 8,          // smaller font to fit
             cellPadding: 2
         },
         headStyles: { fillColor: [220, 220, 220] },
@@ -407,8 +407,8 @@ function downloadPDF(index) {
 
     // Total amount at bottom right
     const finalY = doc.lastAutoTable.finalY;
-    doc.setFontSize(12);
-    doc.text(`Total Amount: ₱${rec.total}`, 140, finalY + 10);
+    doc.setFontSize(8);
+    doc.text(`Total Amount: ₱${rec.total}`, 100, finalY + 10);
 
     doc.save(`Booking_${rec.name}_${rec.date}.pdf`);
 }
