@@ -74,6 +74,9 @@ th { background: var(--main-color, #0d6efd); color: white; }
   .summary-container { max-height: none; overflow: visible; }
 }
 </style>
+
+<!-- SheetJS for Excel Export -->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -165,8 +168,6 @@ th { background: var(--main-color, #0d6efd); color: white; }
   <div id="recordList"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 <script>
 // === ELEMENTS ===
 const nameInput = document.getElementById('name');
@@ -357,7 +358,7 @@ function loadRecords() {
       📍 ${rec.address || 'N/A'}<br>
       <p>Remarks: ${rec.remarks || 'None'}</p>
       <button class="delete-btn" onclick="deleteRecord(${index})">Delete</button>
-      <button class="btn" style="margin-top:5px;" onclick="downloadPDF(${index})">📄 Export PDF</button>
+      <button class="btn" style="margin-top:5px;" onclick="downloadExcel(${index})">📄 Export Excel</button>
       <details style="margin-top:5px;"><summary>View Details</summary>
       <table>
         <thead><tr>
@@ -393,30 +394,64 @@ function deleteRecord(index) {
   loadRecords();
 }
 
-// --- EXPORT PDF ---
-function downloadPDF(index) {
+// --- EXPORT EXCEL ---
+function downloadExcel(index) {
   const records = JSON.parse(localStorage.getItem('bookings')) || [];
   const rec = records[index];
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  let y = 20;
-  doc.setFontSize(14); doc.text(`Booking for ${rec.name}`,20,y); y+=10;
-  doc.setFontSize(11);
-  ['Contact','Delivery','Address','Date','Payment','Distributor','Remarks'].forEach((label,i)=>{
-    const val = [rec.contact,rec.delivery,rec.address || 'N/A',`${rec.date} ${rec.time}`,rec.payment,rec.distributor,rec.remarks || 'None'][i];
-    doc.text(`${label}: ${val}`,20,y); y+=6;
+
+  // --- Prepare worksheet data ---
+  const wsData = [
+    ['Booking for', rec.name],
+    ['Contact', rec.contact],
+    ['Delivery', rec.delivery],
+    ['Address', rec.address || 'N/A'],
+    ['Date & Time', `${rec.date} ${rec.time}`],
+    ['Payment', rec.payment],
+    ['Distributor', rec.distributor],
+    ['Remarks', rec.remarks || 'None'],
+    [],
+    ['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']
+  ];
+
+  rec.items.forEach(item => {
+    wsData.push([
+      item.generic, item.brand, item.qty, item.unit, item.srp,
+      item.discountType, item.discount, item.discountAmt, item.total, item.remarks
+    ]);
   });
-  const tableData = rec.items.map(item => [
-    item.generic,item.brand,item.qty,item.unit,item.srp,item.discountType,
-    item.discount,item.discountAmt,item.total,item.remarks
-  ]);
-  doc.autoTable({
-    head:[['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']],
-    body: tableData, startY: y
+
+  // Add total in the last column of the table
+  const lastRowIndex = wsData.length;
+  wsData.push(['','','','','','','','','Total Amount', rec.total]);
+
+  // --- Create workbook and worksheet ---
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // --- Apply bold to header row and total row ---
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let C = 0; C <= range.e.c; ++C) {
+    // Bold header
+    const headerCell = ws[XLSX.utils.encode_cell({r:9, c:C})];
+    if (headerCell) headerCell.s = {font:{bold:true}};
+
+    // Bold total amount
+    const totalCell = ws[XLSX.utils.encode_cell({r:lastRowIndex, c:8})];
+    if (totalCell) totalCell.s = {font:{bold:true}};
+    const totalValueCell = ws[XLSX.utils.encode_cell({r:lastRowIndex, c:9})];
+    if (totalValueCell) totalValueCell.s = {font:{bold:true}};
+  }
+
+  // --- Auto-width columns ---
+  const colWidths = wsData[9].map((_, i) => {
+    return { wch: Math.max(...wsData.map(r => (r[i] ? r[i].toString().length : 0))) + 2 };
   });
-  y = doc.lastAutoTable.finalY+10;
-  doc.text(`Total Amount: ₱${rec.total}`,70,y);
-  doc.save(`Booking_${rec.name}_${rec.date}.pdf`);
+  ws['!cols'] = colWidths;
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Booking');
+
+  // --- Export Excel ---
+  XLSX.writeFile(wb, `Booking_${rec.name}_${rec.date}.xlsx`);
 }
 
 // --- INITIAL LOAD ---
