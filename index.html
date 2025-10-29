@@ -33,7 +33,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--main-color, #0d6
 }
 .btn:hover { opacity: 0.9; }
 .table-responsive { overflow-x: auto; width: 100%; }
-.table-responsive table { width: 100%; min-width: 700px; border-collapse: collapse; }
+.table-responsive table { width: 100%; min-width: 800px; border-collapse: collapse; }
 table, th, td { border: 1px solid #ddd; padding: 6px; font-size: 13px; text-align: center; }
 th { background: var(--main-color, #0d6efd); color: white; }
 .summary-container {
@@ -61,7 +61,7 @@ th { background: var(--main-color, #0d6efd); color: white; }
   .nav-item { padding: 10px; font-size: 14px; }
   .main { padding: 15px; }
   form { width: 100%; box-shadow: none; padding: 15px; border-radius: 0; }
-  table, .record table { font-size: 11px; }
+  table, .record table { font-size: 11px; min-width: 700px; }
 }
 @media print { body { background: white; } .sidebar, .btn, .delete-btn, .settings { display: none; } .main { padding: 0; } .summary-container { max-height: none; overflow: visible; } }
 </style>
@@ -113,7 +113,7 @@ th { background: var(--main-color, #0d6efd); color: white; }
 <tr>
 <th>Generic</th>
 <th>Brand</th>
-<th>Qty</th>
+<th>Qty + Unit</th>
 <th>SRP</th>
 <th>Discount Type</th>
 <th>Discount Value</th>
@@ -168,19 +168,27 @@ const navItems = document.querySelectorAll('.nav-item');
 const settingsDiv = document.querySelector('.settings');
 const themeSelect = document.getElementById('themeSelect');
 
-// PAYMENT SHOW/HIDE
+// Payment fields toggle
 paymentSelect.addEventListener('change', () => {
 termsDaysContainer.style.display = paymentSelect.value === 'Terms' ? 'block' : 'none';
 bankContainer.style.display = paymentSelect.value === 'Bank' ? 'block' : 'none';
 });
 
-// ADD ROW
+// Add row
 function addRow() {
   const row = document.createElement('tr');
   row.innerHTML = `
     <td><input type="text" class="generic"></td>
     <td><input type="text" class="brand"></td>
-    <td><input type="number" class="qty" min="1" value="1"></td>
+    <td>
+      <input type="number" class="qty" min="1" value="1" style="width:60px;">
+      <select class="unit" style="width:70px;">
+        <option value="pcs">Pcs</option>
+        <option value="box">Box</option>
+        <option value="pack">Pack</option>
+        <option value="tabs">Tabs</option>
+      </select>
+    </td>
     <td><input type="number" class="srp" min="0" value="0"></td>
     <td>
       <select class="discountType">
@@ -199,37 +207,29 @@ function addRow() {
   updateTotals();
 }
 
-// CALCULATE TOTALS
+// Update totals
 function updateTotals() {
   let grandTotal = 0;
   document.querySelectorAll('#orderBody tr').forEach(row => {
     const qty = parseFloat(row.querySelector('.qty').value) || 0;
     const srp = parseFloat(row.querySelector('.srp').value) || 0;
     const discountType = row.querySelector('.discountType').value;
-    let discount = parseFloat(row.querySelector('.discount').value) || 0;
+    const discount = parseFloat(row.querySelector('.discount').value) || 0;
 
     let discAmt = 0;
-    let noDisc = srp * qty;
+    const noDisc = srp * qty;
     let total = noDisc;
 
-    if(discountType === 'percent') {
-      discAmt = (noDisc * discount / 100);
-      total = noDisc - discAmt;
-    } else if(discountType === 'amount') {
-      discAmt = discount;
-      total = noDisc - discAmt;
-    } else if(discountType === 'nodisc') {
-      discAmt = 0;
-      total = noDisc;
-    }
+    if(discountType==='percent'){discAmt=noDisc*discount/100; total=noDisc-discAmt;}
+    else if(discountType==='amount'){discAmt=discount; total=noDisc-discAmt;}
+    else {discAmt=0; total=noDisc;}
 
-    row.querySelector('.discountAmt').value = discAmt.toFixed(2);
-    row.querySelector('.nodisc').value = noDisc.toFixed(2);
-    row.querySelector('.total').value = total.toFixed(2);
-
-    grandTotal += total;
+    row.querySelector('.discountAmt').value=discAmt.toFixed(2);
+    row.querySelector('.nodisc').value=noDisc.toFixed(2);
+    row.querySelector('.total').value=total.toFixed(2);
+    grandTotal+=total;
   });
-  totalField.value = grandTotal.toFixed(2);
+  totalField.value=grandTotal.toFixed(2);
 }
 
 orderBody.addEventListener('input', e => {
@@ -242,7 +242,7 @@ orderBody.addEventListener('click', e => {
 
 addRowBtn.addEventListener('click', addRow);
 
-// NAVIGATION
+// Navigation & settings
 navItems.forEach(item=>{
 item.addEventListener('click', ()=>{
 navItems.forEach(i=>i.classList.remove('active'));
@@ -251,32 +251,33 @@ settingsDiv.style.display = item.textContent.trim() === 'Settings'? 'block':'non
 });
 });
 
-// THEME
-themeSelect.addEventListener('change', () => {
-  const theme = themeSelect.value;
-  if(theme==='default'){document.documentElement.style.setProperty('--sidebar-color','#0d6efd');document.documentElement.style.setProperty('--main-color','#0d6efd');document.documentElement.style.setProperty('--btn-color','#0d6efd');}
-  else if(theme==='black'){document.documentElement.style.setProperty('--sidebar-color','#333');document.documentElement.style.setProperty('--main-color','#000');document.documentElement.style.setProperty('--btn-color','#555');}
-  else if(theme==='red'){document.documentElement.style.setProperty('--sidebar-color','#dc3545');document.documentElement.style.setProperty('--main-color','#b02a37');document.documentElement.style.setProperty('--btn-color','#dc3545');}
-  else if(theme==='yellow'){document.documentElement.style.setProperty('--sidebar-color','#ffc107');document.documentElement.style.setProperty('--main-color','#e0a800');document.documentElement.style.setProperty('--btn-color','#ffc107');}
+// Theme selection
+themeSelect.addEventListener('change', ()=>{
+const theme = themeSelect.value;
+if(theme==='default'){document.documentElement.style.setProperty('--sidebar-color','#0d6efd');document.documentElement.style.setProperty('--main-color','#0d6efd');document.documentElement.style.setProperty('--btn-color','#0d6efd');}
+else if(theme==='black'){document.documentElement.style.setProperty('--sidebar-color','#333');document.documentElement.style.setProperty('--main-color','#000');document.documentElement.style.setProperty('--btn-color','#555');}
+else if(theme==='red'){document.documentElement.style.setProperty('--sidebar-color','#dc3545');document.documentElement.style.setProperty('--main-color','#b02a37');document.documentElement.style.setProperty('--btn-color','#dc3545');}
+else if(theme==='yellow'){document.documentElement.style.setProperty('--sidebar-color','#ffc107');document.documentElement.style.setProperty('--main-color','#e0a800');document.documentElement.style.setProperty('--btn-color','#ffc107');}
 });
 
-// SAVE FORM
+// Save booking
 form.addEventListener('submit', e=>{
 e.preventDefault();
 const items=[];
 document.querySelectorAll('#orderBody tr').forEach(row=>{
 items.push({
-generic:row.querySelector('.generic').value,
-brand:row.querySelector('.brand').value,
-qty:row.querySelector('.qty').value,
-srp:row.querySelector('.srp').value,
-discountType:row.querySelector('.discountType').value,
-discount:row.querySelector('.discount').value,
-total:row.querySelector('.total').value,
-remarks:row.querySelector('.remarksItem').value
+generic: row.querySelector('.generic').value,
+brand: row.querySelector('.brand').value,
+qty: row.querySelector('.qty').value,
+unit: row.querySelector('.unit').value,
+srp: row.querySelector('.srp').value,
+discountType: row.querySelector('.discountType').value,
+discount: row.querySelector('.discount').value,
+total: row.querySelector('.total').value,
+remarks: row.querySelector('.remarksItem').value
 });
 });
-let paymentType=paymentSelect.value;
+let paymentType = paymentSelect.value;
 if(paymentType==='Terms') paymentType+=` (${termsDaysInput.value} days)`;
 if(paymentType==='Bank') paymentType+=` - ${bankNameInput.value}`;
 
@@ -292,7 +293,7 @@ distributor:distributor.value,
 remarks:remarks.value,
 total:totalField.value,
 items,
-details: JSON.stringify(items,null,2)
+details:JSON.stringify(items,null,2)
 };
 
 const records = JSON.parse(localStorage.getItem('bookings'))||[];
@@ -306,7 +307,7 @@ termsDaysContainer.style.display='none';
 bankContainer.style.display='none';
 });
 
-// LOAD RECORDS
+// Load and display records
 function loadRecords() {
 const records = JSON.parse(localStorage.getItem('bookings'))||[];
 summary.innerHTML='';
@@ -325,16 +326,17 @@ div.innerHTML=`<h4>${rec.name} - ₱${rec.total}</h4>
 <details style="margin-top:5px;"><summary>View Details</summary>
 <table>
 <thead><tr>
-<th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Discount Type</th><th>Discount Value</th><th>Discount Amt</th><th>Total</th><th>Remarks</th></tr></thead>
+<th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Discount Type</th><th>Discount Value</th><th>Discount Amt</th><th>Total</th><th>Remarks</th></tr></thead>
 <tbody>
 ${rec.items.map(item=>`<tr>
 <td>${item.generic}</td>
 <td>${item.brand}</td>
 <td>${item.qty}</td>
+<td>${item.unit}</td>
 <td>${item.srp}</td>
 <td>${item.discountType}</td>
 <td>${item.discount}</td>
-<td>${(item.discountType==='percent'? (item.srp*item.qty*(item.discount/100)).toFixed(2) : item.discountType==='amount'? parseFloat(item.discount).toFixed(2) : 0)}</td>
+<td>${item.discountType==='percent'? (item.srp*item.qty*(item.discount/100)).toFixed(2) : item.discountType==='amount'? parseFloat(item.discount).toFixed(2) : 0}</td>
 <td>${item.total}</td>
 <td>${item.remarks}</td>
 </tr>`).join('')}
@@ -345,7 +347,7 @@ summary.appendChild(div);
 });
 }
 
-// DELETE RECORD
+// Delete record
 function deleteRecord(index){
 const records = JSON.parse(localStorage.getItem('bookings'))||[];
 records.splice(index,1);
@@ -353,7 +355,7 @@ localStorage.setItem('bookings',JSON.stringify(records));
 loadRecords();
 }
 
-// DOWNLOAD PDF PER TRANSACTION
+// Export PDF per transaction
 function downloadPDF(index){
 const records = JSON.parse(localStorage.getItem('bookings'))||[];
 const rec = records[index];
@@ -368,16 +370,17 @@ div.innerHTML=`<h2>${rec.name}</h2>
 <p>Distributor: ${rec.distributor}</p>
 <p>Remarks: ${rec.remarks || 'None'}</p>
 <table>
-<thead><tr><th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Discount Type</th><th>Discount Value</th><th>Discount Amt</th><th>Total</th><th>Remarks</th></tr></thead>
+<thead><tr><th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Discount Type</th><th>Discount Value</th><th>Discount Amt</th><th>Total</th><th>Remarks</th></tr></thead>
 <tbody>
 ${rec.items.map(item=>`<tr>
 <td>${item.generic}</td>
 <td>${item.brand}</td>
 <td>${item.qty}</td>
+<td>${item.unit}</td>
 <td>${item.srp}</td>
 <td>${item.discountType}</td>
 <td>${item.discount}</td>
-<td>${(item.discountType==='percent'? (item.srp*item.qty*(item.discount/100)).toFixed(2) : item.discountType==='amount'? parseFloat(item.discount).toFixed(2) : 0)}</td>
+<td>${item.discountType==='percent'? (item.srp*item.qty*(item.discount/100)).toFixed(2) : item.discountType==='amount'? parseFloat(item.discount).toFixed(2) : 0}</td>
 <td>${item.total}</td>
 <td>${item.remarks}</td>
 </tr>`).join('')}
@@ -389,5 +392,6 @@ html2pdf().set({margin:0.5,filename:`Booking_${rec.name}_${rec.date}.pdf`,image:
 
 loadRecords();
 </script>
+</div>
 </body>
 </html>
