@@ -67,6 +67,17 @@
     }
     .delete-btn:hover { background: #b02a37; }
 
+    /* TABLE RESPONSIVE */
+    .table-responsive {
+      overflow-x: auto;
+      width: 100%;
+    }
+    .table-responsive table {
+      width: 100%;
+      min-width: 700px;
+      border-collapse: collapse;
+    }
+
     /* MOBILE RESPONSIVE */
     @media (max-width: 768px) {
       body {
@@ -148,23 +159,25 @@
       </div>
 
       <label>Order Details:</label>
-      <table id="orderTable">
-        <thead>
-          <tr>
-            <th>Generic</th>
-            <th>Brand</th>
-            <th>Qty</th>
-            <th>SRP</th>
-            <th>Discount (%)</th>
-            <th>Discount Amt</th>
-            <th>No Discount</th>
-            <th>Remarks</th>
-            <th>Total</th>
-            <th>🗑</th>
-          </tr>
-        </thead>
-        <tbody id="orderBody"></tbody>
-      </table>
+      <div class="table-responsive">
+        <table id="orderTable">
+          <thead>
+            <tr>
+              <th>Generic</th>
+              <th>Brand</th>
+              <th>Qty</th>
+              <th>SRP</th>
+              <th>Discount (%)</th>
+              <th>Discount Amt</th>
+              <th>No Discount</th>
+              <th>Remarks</th>
+              <th>Total</th>
+              <th>🗑</th>
+            </tr>
+          </thead>
+          <tbody id="orderBody"></tbody>
+        </table>
+      </div>
       <button type="button" class="btn" id="addRow">+ Add Item</button>
 
       <label>Total Amount (₱):</label>
@@ -339,26 +352,28 @@
           <p><strong>💳 Payment:</strong> ${rec.payment}</p>
           <p><strong>🏢 Distributor:</strong> ${rec.distributor || 'N/A'}</p>
           <p><strong>🗒 Remarks:</strong> ${rec.remarks || 'None'}</p>
-          <table style="width:100%; border-collapse:collapse; margin-top:8px;">
-            <thead>
-              <tr style="background:var(--main-color,#0d6efd); color:white;">
-                <th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Disc %</th><th>Total</th><th>Remarks</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rec.items.map(item => `
-                <tr>
-                  <td>${item.generic || '-'}</td>
-                  <td>${item.brand || '-'}</td>
-                  <td>${item.qty}</td>
-                  <td>${item.srp}</td>
-                  <td>${item.discount}</td>
-                  <td>₱${item.total}</td>
-                  <td>${item.remarks || ''}</td>
+          <div class="table-responsive">
+            <table style="width:100%; border-collapse:collapse; margin-top:8px;">
+              <thead>
+                <tr style="background:var(--main-color,#0d6efd); color:white;">
+                  <th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Disc %</th><th>Total</th><th>Remarks</th>
                 </tr>
-              `).join('')}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                ${rec.items.map(item => `
+                  <tr>
+                    <td>${item.generic || '-'}</td>
+                    <td>${item.brand || '-'}</td>
+                    <td>${item.qty}</td>
+                    <td>${item.srp}</td>
+                    <td>${item.discount}</td>
+                    <td>₱${item.total}</td>
+                    <td>${item.remarks || ''}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
           <p style="text-align:right; font-weight:700; margin-top:8px;">Total Amount: ₱${rec.total}</p>
           <button class="delete-btn" onclick="deleteRecord(${index})">🗑 Delete</button>
         `;
