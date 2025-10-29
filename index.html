@@ -111,7 +111,17 @@ th { background: var(--main-color, #0d6efd); color: white; }
 <table id="orderTable">
 <thead>
 <tr>
-<th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Discount (%)</th><th>Discount Amt</th><th>No Discount</th><th>Remarks</th><th>Total</th><th>🗑</th>
+<th>Generic</th>
+<th>Brand</th>
+<th>Qty</th>
+<th>SRP</th>
+<th>Discount Type</th>
+<th>Discount Value</th>
+<th>Discount Amt</th>
+<th>No Discount</th>
+<th>Remarks</th>
+<th>Total</th>
+<th>🗑</th>
 </tr>
 </thead>
 <tbody id="orderBody"></tbody>
@@ -167,43 +177,67 @@ bankContainer.style.display = paymentSelect.value === 'Bank' ? 'block' : 'none';
 // ADD ROW
 function addRow() {
   const row = document.createElement('tr');
-  row.innerHTML = `<td><input class="generic" type="text"></td>
-  <td><input class="brand" type="text"></td>
-  <td><input class="qty" type="number" min="1" value="1"></td>
-  <td><input class="srp" type="number" min="0" value="0"></td>
-  <td><input class="discount" type="number" min="0" max="100" value="0"></td>
-  <td><input class="discountAmt" readonly></td>
-  <td><input class="nodisc" readonly></td>
-  <td><input class="remarksItem" type="text"></td>
-  <td><input class="total" readonly></td>
-  <td><button type="button" class="deleteRow">❌</button></td>`;
+  row.innerHTML = `
+    <td><input type="text" class="generic"></td>
+    <td><input type="text" class="brand"></td>
+    <td><input type="number" class="qty" min="1" value="1"></td>
+    <td><input type="number" class="srp" min="0" value="0"></td>
+    <td>
+      <select class="discountType">
+        <option value="percent">%</option>
+        <option value="amount">Fixed Amount</option>
+        <option value="nodisc">No Discount</option>
+      </select>
+    </td>
+    <td><input type="number" class="discount" min="0" value="0"></td>
+    <td><input type="number" class="discountAmt" readonly></td>
+    <td><input type="number" class="nodisc" readonly></td>
+    <td><input type="text" class="remarksItem"></td>
+    <td><input type="number" class="total" readonly></td>
+    <td><button type="button" class="deleteRow">❌</button></td>`;
   orderBody.appendChild(row);
   updateTotals();
 }
 
+// CALCULATE TOTALS
 function updateTotals() {
-let grandTotal = 0;
-document.querySelectorAll('#orderBody tr').forEach(row=>{
-const qty = parseFloat(row.querySelector('.qty').value)||0;
-const srp = parseFloat(row.querySelector('.srp').value)||0;
-const discount = parseFloat(row.querySelector('.discount').value)||0;
-const discAmt = (srp*qty)*(discount/100);
-const noDisc = srp*qty;
-const total = noDisc-discAmt;
-row.querySelector('.discountAmt').value=discAmt.toFixed(2);
-row.querySelector('.nodisc').value=noDisc.toFixed(2);
-row.querySelector('.total').value=total.toFixed(2);
-grandTotal+=total;
-});
-totalField.value=grandTotal.toFixed(2);
+  let grandTotal = 0;
+  document.querySelectorAll('#orderBody tr').forEach(row => {
+    const qty = parseFloat(row.querySelector('.qty').value) || 0;
+    const srp = parseFloat(row.querySelector('.srp').value) || 0;
+    const discountType = row.querySelector('.discountType').value;
+    let discount = parseFloat(row.querySelector('.discount').value) || 0;
+
+    let discAmt = 0;
+    let noDisc = srp * qty;
+    let total = noDisc;
+
+    if(discountType === 'percent') {
+      discAmt = (noDisc * discount / 100);
+      total = noDisc - discAmt;
+    } else if(discountType === 'amount') {
+      discAmt = discount;
+      total = noDisc - discAmt;
+    } else if(discountType === 'nodisc') {
+      discAmt = 0;
+      total = noDisc;
+    }
+
+    row.querySelector('.discountAmt').value = discAmt.toFixed(2);
+    row.querySelector('.nodisc').value = noDisc.toFixed(2);
+    row.querySelector('.total').value = total.toFixed(2);
+
+    grandTotal += total;
+  });
+  totalField.value = grandTotal.toFixed(2);
 }
 
-orderBody.addEventListener('input',e=>{
-if(['qty','srp','discount'].includes(e.target.className)) updateTotals();
+orderBody.addEventListener('input', e => {
+  if(['qty','srp','discount','discountType'].includes(e.target.className)) updateTotals();
 });
 
-orderBody.addEventListener('click',e=>{
-if(e.target.classList.contains('deleteRow')){e.target.closest('tr').remove();updateTotals();}
+orderBody.addEventListener('click', e => {
+  if(e.target.classList.contains('deleteRow')){e.target.closest('tr').remove();updateTotals();}
 });
 
 addRowBtn.addEventListener('click', addRow);
@@ -236,6 +270,7 @@ generic:row.querySelector('.generic').value,
 brand:row.querySelector('.brand').value,
 qty:row.querySelector('.qty').value,
 srp:row.querySelector('.srp').value,
+discountType:row.querySelector('.discountType').value,
 discount:row.querySelector('.discount').value,
 total:row.querySelector('.total').value,
 remarks:row.querySelector('.remarksItem').value
@@ -286,28 +321,31 @@ div.innerHTML=`<h4>${rec.name} - ₱${rec.total}</h4>
 📍 ${rec.address || 'N/A'}<br>
 <p>Remarks: ${rec.remarks || 'None'}</p>
 <button class="delete-btn" onclick="deleteRecord(${index})">Delete</button>
-<button class="btn" onclick="exportRecordPDF(${index})" style="margin-top:5px;">📄 Export PDF</button>
-<details style="margin-top:5px;"><summary>Order Items</summary>
-<div class="table-responsive">
+<button class="btn" style="margin-top:5px;" onclick="downloadPDF(${index})">📄 Export PDF</button>
+<details style="margin-top:5px;"><summary>View Details</summary>
 <table>
-<thead><tr><th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Discount %</th><th>Discount Amt</th><th>Total</th><th>Remarks</th></tr></thead>
+<thead><tr>
+<th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Discount Type</th><th>Discount Value</th><th>Discount Amt</th><th>Total</th><th>Remarks</th></tr></thead>
 <tbody>
 ${rec.items.map(item=>`<tr>
 <td>${item.generic}</td>
 <td>${item.brand}</td>
 <td>${item.qty}</td>
 <td>${item.srp}</td>
+<td>${item.discountType}</td>
 <td>${item.discount}</td>
-<td>${(item.srp*item.qty*(item.discount/100)).toFixed(2)}</td>
+<td>${(item.discountType==='percent'? (item.srp*item.qty*(item.discount/100)).toFixed(2) : item.discountType==='amount'? parseFloat(item.discount).toFixed(2) : 0)}</td>
 <td>${item.total}</td>
 <td>${item.remarks}</td>
 </tr>`).join('')}
 </tbody>
-</table></div></details>`;
+</table>
+</details>`;
 summary.appendChild(div);
 });
 }
 
+// DELETE RECORD
 function deleteRecord(index){
 const records = JSON.parse(localStorage.getItem('bookings'))||[];
 records.splice(index,1);
@@ -315,47 +353,37 @@ localStorage.setItem('bookings',JSON.stringify(records));
 loadRecords();
 }
 
-// EXPORT PDF per transaction
-function exportRecordPDF(index){
+// DOWNLOAD PDF PER TRANSACTION
+function downloadPDF(index){
 const records = JSON.parse(localStorage.getItem('bookings'))||[];
 const rec = records[index];
-const div=document.createElement('div');
-div.innerHTML=`<div style="font-family:Poppins,sans-serif;padding:20px;">
-<h1 style="text-align:center;color:#0d6efd;">Booking Summary</h1>
-<p><strong>Name:</strong> ${rec.name}</p>
-<p><strong>Contact:</strong> ${rec.contact}</p>
-<p><strong>Delivery:</strong> ${rec.delivery}</p>
-<p><strong>Address:</strong> ${rec.address || 'N/A'}</p>
-<p><strong>Date & Time:</strong> ${rec.date || 'N/A'} ${rec.time || ''}</p>
-<p><strong>Payment:</strong> ${rec.payment}</p>
-<p><strong>Distributor:</strong> ${rec.distributor || 'N/A'}</p>
-<p><strong>Remarks:</strong> ${rec.remarks || 'None'}</p>
-<table style="width:100%;border-collapse:collapse;margin-top:15px;border:1px solid #ddd;">
-<thead><tr style="background:#0d6efd;color:white;">
-<th style="border:1px solid #ddd;padding:6px;">Generic</th>
-<th style="border:1px solid #ddd;padding:6px;">Brand</th>
-<th style="border:1px solid #ddd;padding:6px;">Qty</th>
-<th style="border:1px solid #ddd;padding:6px;">SRP</th>
-<th style="border:1px solid #ddd;padding:6px;">Discount %</th>
-<th style="border:1px solid #ddd;padding:6px;">Discount Amt</th>
-<th style="border:1px solid #ddd;padding:6px;">Total</th>
-<th style="border:1px solid #ddd;padding:6px;">Remarks</th>
-</tr></thead>
+const div = document.createElement('div');
+div.style.padding='10px';
+div.innerHTML=`<h2>${rec.name}</h2>
+<p>Contact: ${rec.contact}</p>
+<p>Delivery: ${rec.delivery}</p>
+<p>Address: ${rec.address || 'N/A'}</p>
+<p>Date/Time: ${rec.date} ${rec.time}</p>
+<p>Payment: ${rec.payment}</p>
+<p>Distributor: ${rec.distributor}</p>
+<p>Remarks: ${rec.remarks || 'None'}</p>
+<table>
+<thead><tr><th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Discount Type</th><th>Discount Value</th><th>Discount Amt</th><th>Total</th><th>Remarks</th></tr></thead>
 <tbody>
 ${rec.items.map(item=>`<tr>
-<td style="border:1px solid #ddd;padding:4px;">${item.generic}</td>
-<td style="border:1px solid #ddd;padding:4px;">${item.brand}</td>
-<td style="border:1px solid #ddd;padding:4px;">${item.qty}</td>
-<td style="border:1px solid #ddd;padding:4px;">${item.srp}</td>
-<td style="border:1px solid #ddd;padding:4px;">${item.discount}</td>
-<td style="border:1px solid #ddd;padding:4px;">${(item.srp*item.qty*(item.discount/100)).toFixed(2)}</td>
-<td style="border:1px solid #ddd;padding:4px;">${item.total}</td>
-<td style="border:1px solid #ddd;padding:4px;">${item.remarks}</td>
+<td>${item.generic}</td>
+<td>${item.brand}</td>
+<td>${item.qty}</td>
+<td>${item.srp}</td>
+<td>${item.discountType}</td>
+<td>${item.discount}</td>
+<td>${(item.discountType==='percent'? (item.srp*item.qty*(item.discount/100)).toFixed(2) : item.discountType==='amount'? parseFloat(item.discount).toFixed(2) : 0)}</td>
+<td>${item.total}</td>
+<td>${item.remarks}</td>
 </tr>`).join('')}
 </tbody>
 </table>
-<p style="text-align:right;font-weight:bold;margin-top:10px;">Total Amount: ₱${rec.total}</p>
-</div>`;
+<p style="text-align:right;font-weight:bold;margin-top:10px;">Total Amount: ₱${rec.total}</p>`;
 html2pdf().set({margin:0.5,filename:`Booking_${rec.name}_${rec.date}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(div).save();
 }
 
