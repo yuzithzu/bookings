@@ -1,543 +1,595 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>📦 Booking App</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>📦 Booking App — Full</title>
 
-<!-- SheetJS for Excel Export -->
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <!-- SheetJS (Excel) -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <!-- html2canvas (JPEG export) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- html2canvas for JPEG Export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    /* ---------- General ---------- */
+    :root {
+      --main: #0d6efd;
+      --accent: #0d6efd;
+      --danger: #dc3545;
+      --muted: #6c757d;
+    }
+    * { box-sizing: border-box; font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    body { margin: 0; background: #f4f6f9; color: #222; min-height: 100vh; display: flex; }
 
-<style>
-/* --- GENERAL STYLES --- */
-* { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-body { margin: 0; display: flex; min-height: 100vh; background: #f4f6f9; }
+    /* ---------- Sidebar ---------- */
+    .sidebar {
+      width: 230px; background: var(--main); color: #fff; padding: 22px 16px; display:flex; flex-direction:column; align-items:center;
+    }
+    .sidebar h2 { margin: 0 0 18px; font-size:18px; }
+    .nav-item { width:100%; text-align:center; padding:10px 6px; cursor:pointer; border-radius:8px; margin-bottom:6px; }
+    .nav-item.active, .nav-item:hover { background: rgba(255,255,255,0.12); }
 
-/* --- SIDEBAR --- */
-.sidebar {
-  width: 230px; background: var(--sidebar-color, #0d6efd); color: white;
-  display: flex; flex-direction: column; align-items: center; padding: 20px 0;
-}
-.sidebar h2 { font-size: 20px; margin-bottom: 40px; }
-.nav-item {
-  width: 100%; text-align: center; padding: 12px 0; cursor: pointer; transition: 0.2s;
-}
-.nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.15); }
+    /* ---------- Main ---------- */
+    .main { flex:1; padding:18px; overflow:auto; }
+    .container { max-width:1100px; margin: 0 auto; }
+    h1 { color:var(--main); text-align:center; margin-bottom:12px; }
 
-/* --- MAIN --- */
-.main { flex: 1; padding: 30px; overflow-y: auto; }
-h1 { color: var(--main-color, #0d6efd); text-align: center; margin-bottom: 20px; }
-form {
-  background: #fff; padding: 20px; border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 900px; margin: auto;
-}
-label { font-weight: 600; margin-top: 10px; display: block; }
-input, textarea, select {
-  width: 100%; padding: 8px; margin-top: 6px;
-  border: 1px solid #ccc; border-radius: 8px; font-size: 14px;
-}
-input:focus, textarea:focus, select:focus { border-color: var(--main-color, #0d6efd); outline: none; }
+    form.card {
+      background:#fff; border-radius:12px; padding:18px; box-shadow:0 6px 18px rgba(15,15,15,0.06);
+      margin-bottom:18px;
+    }
+    label { display:block; font-weight:600; margin-top:10px; }
+    input[type="text"], input[type="tel"], input[type="number"], input[type="date"], input[type="time"],
+    select, textarea {
+      width:100%; padding:8px 10px; margin-top:6px; border-radius:8px; border:1px solid #d0d7de; font-size:14px;
+    }
+    textarea { resize: vertical; min-height:60px; }
 
-textarea { resize: vertical; }
+    .flex-row { display:flex; gap:10px; align-items:center; }
+    .flex-row > * { flex:1; }
 
-/* --- BUTTONS --- */
-.btn {
-  background: var(--btn-color, #0d6efd); color: white; border: none;
-  border-radius: 8px; padding: 10px; font-size: 16px; cursor: pointer;
-  margin-top: 15px; transition: 0.2s;
-}
-.btn:hover { opacity: 0.9; }
+    .btn {
+      display:inline-block; background:var(--accent); color:#fff; padding:9px 12px; border-radius:8px; border:none; cursor:pointer;
+      font-weight:600; margin-top:12px;
+    }
+    .btn.secondary { background:#6c757d; }
+    .btn.danger { background:var(--danger); }
 
-.btn-delete {
-  background: #dc3545; color: white; border: none; padding: 8px 14px;
-  border-radius: 8px; cursor: pointer; transition: 0.2s;
-}
-.btn-delete:hover { background: #b02a37; }
+    /* ---------- Table (items) ---------- */
+    .table-responsive { overflow-x:auto; margin-top:10px; }
+    table { width:100%; border-collapse:collapse; min-width:900px; table-layout:fixed; }
+    th, td { border:1px solid #e6e9ee; padding:8px; font-size:13px; vertical-align:top; text-align:center; }
+    th { background:var(--main); color:#fff; font-weight:700; }
+    td input, td select { width:100%; padding:6px; box-sizing:border-box; }
 
-.table-responsive { overflow-x: auto; width: 100%; margin-top: 10px; }
-table { width: 100%; min-width: 900px; border-collapse: collapse; table-layout: fixed; }
-th, td {
-  border: 1px solid #ddd; padding: 6px; font-size: 13px; text-align: center;
-  vertical-align: top; white-space: normal; word-wrap: break-word; overflow-wrap: break-word;
-}
-th { background: var(--main-color, #0d6efd); color: white; }
+    /* wrap remarks column */
+    td.remarksCol, th.remarksCol { max-width:220px; word-wrap:break-word; white-space:normal; overflow-wrap:break-word; text-align:left; }
 
-/* Limit width of Remarks columns so they wrap vertically */
-td:nth-child(9), th:nth-child(9),
-td:nth-child(10), th:nth-child(10) { max-width: 200px; }
+    .small { padding:6px 8px; font-size:13px; }
 
-/* --- RECORDS LIST --- */
-.summary-container {
-  background: #fff; padding: 15px; border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 20px;
-}
-.record { border: 1px solid #ddd; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; background: #fafbff; }
-.record h4 { margin: 0 0 5px; color: var(--main-color, #0d6efd); }
-.record table th, .record table td { border: 1px solid #ddd; font-size: 12px; padding: 4px; }
+    /* record list */
+    .summary { background:#fff; padding:14px; border-radius:10px; box-shadow:0 6px 18px rgba(15,15,15,0.04); }
+    .record { border:1px solid #e6e9ee; padding:10px; border-radius:8px; margin-bottom:10px; background:#fafbff; }
+    .record h4 { margin:0 0 6px; color:var(--main); }
+    .record p { margin:4px 0; color:#333; font-size:14px; }
 
-/* --- RESPONSIVE --- */
-@media (max-width: 768px) {
-  body { flex-direction: column; height: auto; }
-  .sidebar { width: 100%; flex-direction: row; justify-content: space-around; padding: 10px 0; }
-  .sidebar h2 { font-size: 18px; margin: 0; }
-  .nav-item { padding: 10px; font-size: 14px; }
-  table, .record table { font-size: 11px; min-width: 700px; }
-}
-</style>
+    /* responsive */
+    @media (max-width:900px) {
+      .sidebar { display:none; }
+      table { min-width:720px; }
+    }
+  </style>
 </head>
 <body>
-
-<div class="sidebar">
-  <h2>📦 Booking App</h2>
-  <div class="nav-item active">New Booking</div>
-  <div class="nav-item">Settings</div>
-</div>
-
-<div class="main">
-<h1>Booking Form</h1>
-<form id="bookingForm">
-  <label>Name of Account (MD/Patient):</label>
-  <input type="text" id="name" required>
-  
-  <label>Contact Number:</label>
-  <input type="tel" id="contact" required>
-  
-  <label>Delivery Option:</label>
-  <select id="delivery">
-    <option>Pick-Up (by client at office)</option>
-    <option>Delivery (by MANILA branch rider to hub (CSP)</option>
-    <option selected>Pick-Up by Lalamove / Grab / Courier</option>
-  </select>
-  
-  <label>Pick-Up / Delivery Address:</label>
-  <textarea id="address" rows="2"></textarea>
-  
-  <label>Preferred Date & Time:</label>
-  <input type="date" id="date"> <input type="time" id="time">
-  
-  <label>Payment Option:</label>
-  <select id="payment">
-    <option value="C.O.D">C.O.D (Cash on Delivery)</option>
-    <option value="Terms">Terms</option>
-    <option value="PDC">PDC (Post Dated Check)</option>
-    <option value="Bank">Deposited thru Bank</option>
-  </select>
-  
-  <div id="termsDaysContainer" style="display:none;">
-    <label>Terms (Days):</label>
-    <input type="number" id="termsDays" min="1" placeholder="Enter number of days">
+  <div class="sidebar">
+    <h2>📦 Booking App</h2>
+    <div class="nav-item active">New Booking</div>
+    <div class="nav-item">Records</div>
   </div>
-  
-  <div id="bankContainer" style="display:none;">
-    <label>Bank Name:</label>
-    <input type="text" id="bankName" placeholder="e.g. BPI, BDO, Metrobank">
+
+  <div class="main">
+    <div class="container">
+      <h1>Booking Form</h1>
+
+      <!-- FORM -->
+      <form id="bookingForm" class="card">
+        <div style="display:flex; gap:12px; align-items:flex-start;">
+          <div style="flex:1;">
+            <label for="name">Name of Account (MD/Patient):</label>
+            <input id="name" type="text" required>
+
+            <label for="contact">Contact Number:</label>
+            <input id="contact" type="tel" required>
+
+            <label for="delivery">Delivery Option:</label>
+            <select id="delivery">
+              <option>Pick-Up (by client at office)</option>
+              <option>Delivery (by MANILA branch rider to hub (CSP)</option>
+              <option selected>Pick-Up by Lalamove / Grab / Courier</option>
+            </select>
+
+            <label for="address">Pick-Up / Delivery Address:</label>
+            <textarea id="address" rows="2"></textarea>
+
+            <div class="flex-row">
+              <div>
+                <label for="date">Preferred Date</label>
+                <input id="date" type="date">
+              </div>
+              <div>
+                <label for="time">Preferred Time</label>
+                <input id="time" type="time">
+              </div>
+            </div>
+
+            <label for="payment">Payment Option:</label>
+            <select id="payment">
+              <option value="C.O.D">C.O.D (Cash on Delivery)</option>
+              <option value="Terms">Terms</option>
+              <option value="PDC">PDC (Post Dated Check)</option>
+              <option value="Bank">Deposited thru Bank</option>
+            </select>
+
+            <div id="termsDaysContainer" style="display:none;">
+              <label for="termsDays">Terms (Days):</label>
+              <input id="termsDays" type="number" min="1" placeholder="Enter number of days">
+            </div>
+
+            <div id="bankContainer" style="display:none;">
+              <label for="bankName">Bank Name:</label>
+              <input id="bankName" type="text" placeholder="e.g. BPI, BDO, Metrobank">
+            </div>
+          </div>
+
+          <div style="width:320px;">
+            <label for="distributor">Distributor & Branch:</label>
+            <input id="distributor" type="text">
+
+            <label for="remarks">Remarks / Special Instructions:</label>
+            <textarea id="remarks" rows="6" placeholder="Notes for rider, special handling, etc."></textarea>
+
+            <label for="total">Total Amount (₱):</label>
+            <input id="total" type="number" readonly step="0.01">
+
+            <button id="saveBooking" class="btn" style="width:100%;">Save Booking</button>
+          </div>
+        </div>
+
+        <!-- Items table -->
+        <label style="margin-top:14px;">Order Details:</label>
+        <div class="table-responsive">
+          <table id="orderTable" aria-label="Order items">
+            <thead>
+              <tr>
+                <th style="width:110px">Generic</th>
+                <th style="width:110px">Brand</th>
+                <th style="width:110px">Qty</th>
+                <th style="width:100px">Unit</th>
+                <th style="width:110px">SRP</th>
+                <th style="width:120px">Discount Type</th>
+                <th style="width:120px">Discount Value</th>
+                <th style="width:120px">Discount Amt</th>
+                <th style="width:120px">No Discount</th>
+                <th style="width:110px">Total</th>
+                <th style="width:60px">🗑</th>
+              </tr>
+            </thead>
+            <tbody id="orderBody"></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button type="button" id="addRow" class="btn secondary" style="background:#198754">+ Add Item</button>
+          <button type="button" id="clearItems" class="btn secondary" style="background:#6c757d">Clear Items</button>
+        </div>
+      </form>
+
+      <!-- SUMMARY / RECORDS -->
+      <div class="summary">
+        <h3 style="margin-top:0;">Saved Bookings</h3>
+        <div id="recordList"></div>
+      </div>
+    </div>
   </div>
-  
-  <label>Order Details:</label>
-  <div class="table-responsive">
-    <table id="orderTable">
-      <thead>
-        <tr>
-          <th>Generic</th><th>Brand</th><th>Qty + Unit</th><th>SRP</th>
-          <th>Discount Type</th><th>Discount Value</th><th>Discount Amt</th>
-          <th>No Discount</th><th>Remarks</th><th>Total</th><th>🗑</th>
-        </tr>
-      </thead>
-      <tbody id="orderBody"></tbody>
-    </table>
-  </div>
-  <button type="button" class="btn" id="addRow">+ Add Item</button>
-  
-  <label>Total Amount (₱):</label>
-  <input type="number" id="total" readonly step="0.01">
-  
-  <label>Distributor & Branch:</label>
-  <input type="text" id="distributor">
-  
-  <label>Remarks / Special Instructions:</label>
-  <textarea id="remarks" rows="3"></textarea>
-  
-  <button class="btn" type="submit">Save Booking</button>
-</form>
 
-<div class="settings" style="display:none; margin-top:20px; text-align:center;">
-  <label for="themeSelect" style="color:white;">Choose Theme:</label>
-  <select id="themeSelect" style="padding:5px; border-radius:5px;">
-    <option value="default">Blue (Default)</option>
-    <option value="black">Black</option>
-    <option value="red">Red</option>
-    <option value="yellow">Yellow</option>
-  </select>
-</div>
+  <script>
+  /* -------------------- Elements -------------------- */
+  const nameInput = document.getElementById('name');
+  const contactInput = document.getElementById('contact');
+  const deliveryInput = document.getElementById('delivery');
+  const addressInput = document.getElementById('address');
+  const dateInput = document.getElementById('date');
+  const timeInput = document.getElementById('time');
+  const paymentSelect = document.getElementById('payment');
+  const termsDaysContainer = document.getElementById('termsDaysContainer');
+  const termsDaysInput = document.getElementById('termsDays');
+  const bankContainer = document.getElementById('bankContainer');
+  const bankNameInput = document.getElementById('bankName');
+  const distributorInput = document.getElementById('distributor');
+  const remarksInput = document.getElementById('remarks');
+  const totalField = document.getElementById('total');
 
-<div class="summary-container" id="summaryContainer">
-  <h3>Saved Bookings</h3>
-  <div id="recordList"></div>
-</div>
+  const addRowBtn = document.getElementById('addRow');
+  const clearItemsBtn = document.getElementById('clearItems');
+  const orderBody = document.getElementById('orderBody');
 
-<script>
-// === ELEMENTS ===
-const nameInput = document.getElementById('name');
-const contactInput = document.getElementById('contact');
-const deliveryInput = document.getElementById('delivery');
-const addressInput = document.getElementById('address');
-const dateInput = document.getElementById('date');
-const timeInput = document.getElementById('time');
-const distributorInput = document.getElementById('distributor');
-const remarksInput = document.getElementById('remarks');
-const addRowBtn = document.getElementById('addRow');
-const orderBody = document.getElementById('orderBody');
-const totalField = document.getElementById('total');
-const form = document.getElementById('bookingForm');
-const summary = document.getElementById('recordList');
-const paymentSelect = document.getElementById('payment');
-const termsDaysContainer = document.getElementById('termsDaysContainer');
-const bankContainer = document.getElementById('bankContainer');
-const termsDaysInput = document.getElementById('termsDays');
-const bankNameInput = document.getElementById('bankName');
-const navItems = document.querySelectorAll('.nav-item');
-const settingsDiv = document.querySelector('.settings');
-const themeSelect = document.getElementById('themeSelect');
+  const saveBookingBtn = document.getElementById('saveBooking');
+  const recordList = document.getElementById('recordList');
 
-// === PAYMENT TOGGLE ===
-paymentSelect.addEventListener('change', () => {
-  termsDaysContainer.style.display = paymentSelect.value === 'Terms' ? 'block' : 'none';
-  bankContainer.style.display = paymentSelect.value === 'Bank' ? 'block' : 'none';
-});
-
-// === ADD ROW ===
-function addRow() {
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <td><input type="text" class="generic"></td>
-    <td><input type="text" class="brand"></td>
-    <td>
-      <input type="number" class="qty" min="0" value="1" step="0.01" style="width:60px;">
-      <select class="unit" style="width:70px;">
-        <option value="pcs">Pcs</option>
-        <option value="box">Box</option>
-        <option value="pfs">Pfs</option>
-        <option value="vial">Vials</option>
-      </select>
-    </td>
-    <td><input type="number" class="srp" min="0" value="0" step="0.01"></td>
-    <td>
-      <select class="discountType">
-        <option value="percent">%</option>
-        <option value="amount">Fixed Amount</option>
-        <option value="nodisc">No Discount</option>
-      </select>
-    </td>
-    <td><input type="number" class="discount" min="0" value="0" step="0.01"></td>
-    <td><input type="number" class="discountAmt" readonly></td>
-    <td><input type="number" class="nodisc" readonly></td>
-    <td><input type="text" class="remarksItem"></td>
-    <td><input type="number" class="total" readonly></td>
-    <td><button type="button" class="deleteRow">❌</button></td>`;
-  orderBody.appendChild(row);
-  updateTotals();
-}
-
-// === UPDATE TOTALS ===
-function updateTotals() {
-  let grandTotal = 0;
-  document.querySelectorAll('#orderBody tr').forEach(row => {
-    const qty = parseFloat(row.querySelector('.qty').value) || 0;
-    const srp = parseFloat(row.querySelector('.srp').value) || 0;
-    const discountType = row.querySelector('.discountType').value;
-    const discount = parseFloat(row.querySelector('.discount').value) || 0;
-
-    const noDisc = srp * qty;
-    let discAmt = 0, total = noDisc;
-
-    if (discountType === 'percent') discAmt = noDisc * discount / 100;
-    else if (discountType === 'amount') discAmt = discount;
-
-    total = noDisc - discAmt;
-    row.querySelector('.discountAmt').value = discAmt.toFixed(2);
-    row.querySelector('.nodisc').value = noDisc.toFixed(2);
-    row.querySelector('.total').value = total.toFixed(2);
-
-    grandTotal += total;
+  /* -------------------- Payment toggle -------------------- */
+  paymentSelect.addEventListener('change', () => {
+    const val = paymentSelect.value;
+    termsDaysContainer.style.display = (val === 'Terms') ? 'block' : 'none';
+    bankContainer.style.display = (val === 'Bank') ? 'block' : 'none';
   });
-  totalField.value = grandTotal.toFixed(2);
-}
 
-// === EVENT LISTENERS ===
-orderBody.addEventListener('input', e => {
-  if (['qty','srp','discount','discountType'].includes(e.target.className)) updateTotals();
-});
+  /* -------------------- Add one default row -------------------- */
+  addRow(); // create one empty row on load
 
-orderBody.addEventListener('click', e => {
-  if (e.target.classList.contains('deleteRow')) {
-    e.target.closest('tr').remove();
+  /* -------------------- Functions: addRow, updateTotals -------------------- */
+  function addRow() {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" class="generic" placeholder="Generic name"></td>
+      <td><input type="text" class="brand" placeholder="Brand"></td>
+      <td><input type="number" class="qty" min="0" step="0.01" value="1" style="width:100%;"></td>
+      <td>
+        <select class="unit">
+          <option value="pcs">Pcs</option>
+          <option value="box">Box</option>
+          <option value="pfs">Pfs</option>
+          <option value="vial">Vial</option>
+        </select>
+      </td>
+      <td><input type="number" class="srp" min="0" step="0.01" value="0"></td>
+      <td>
+        <select class="discountType">
+          <option value="percent">%</option>
+          <option value="amount">Fixed Amount</option>
+          <option value="nodisc">No Discount</option>
+        </select>
+      </td>
+      <td><input type="number" class="discount" min="0" step="0.01" value="0"></td>
+      <td><input type="number" class="discountAmt" readonly></td>
+      <td><input type="number" class="nodisc" readonly></td>
+      <td class="remarksCol"><input type="text" class="remarksItem" placeholder="Remarks"></td>
+      <td><input type="number" class="total" readonly></td>
+      <td><button type="button" class="btn-danger small deleteRow" style="background:#dc3545; color:#fff; border-radius:6px; padding:6px 8px;">❌</button></td>
+    `;
+    orderBody.appendChild(tr);
+    // attach event listeners for inputs in this row dynamically
+    tr.querySelectorAll('input, select').forEach(el => {
+      el.addEventListener('input', updateTotals);
+      el.addEventListener('change', updateTotals);
+    });
+    // delete row handler
+    tr.querySelector('.deleteRow').addEventListener('click', () => {
+      tr.remove();
+      updateTotals();
+    });
     updateTotals();
   }
-});
 
-addRowBtn.addEventListener('click', addRow);
-
-// --- NAVIGATION & THEME ---
-navItems.forEach(item => {
-  item.addEventListener('click', () => {
-    navItems.forEach(i => i.classList.remove('active'));
-    item.classList.add('active');
-    settingsDiv.style.display = item.textContent.trim() === 'Settings' ? 'block' : 'none';
+  clearItemsBtn.addEventListener('click', () => {
+    orderBody.innerHTML = '';
+    addRow(); updateTotals();
   });
-});
 
-themeSelect.addEventListener('change', () => {
-  const theme = themeSelect.value;
-  const themes = {
-    default: ['#0d6efd','#0d6efd','#0d6efd'],
-    black: ['#333','#000','#555'],
-    red: ['#dc3545','#b02a37','#dc3545'],
-    yellow: ['#ffc107','#e0a800','#ffc107']
-  };
-  [ '--sidebar-color', '--main-color', '--btn-color' ].forEach((varName,i) => {
-    document.documentElement.style.setProperty(varName, themes[theme][i]);
-  });
-});
-
-// --- SAVE BOOKING ---
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  const items = [];
-  document.querySelectorAll('#orderBody tr').forEach(row => {
-    const qty = parseFloat(row.querySelector('.qty').value) || 0;
-    const srp = parseFloat(row.querySelector('.srp').value) || 0;
-    const discountType = row.querySelector('.discountType').value;
-    const discount = parseFloat(row.querySelector('.discount').value) || 0;
-    const noDisc = srp * qty;
-    let discAmt = 0, total = noDisc;
-    if (discountType === 'percent') discAmt = noDisc * discount / 100;
-    else if (discountType === 'amount') discAmt = discount;
-    total = noDisc - discAmt;
-
-    items.push({
-      generic: row.querySelector('.generic').value,
-      brand: row.querySelector('.brand').value,
-      qty, unit: row.querySelector('.unit').value, srp,
-      discountType, discount,
-      discountAmt: discAmt.toFixed(2),
-      total: total.toFixed(2),
-      remarks: row.querySelector('.remarksItem').value
+  function updateTotals() {
+    let grand = 0;
+    const rows = orderBody.querySelectorAll('tr');
+    rows.forEach(row => {
+      const qty = parseFloat(row.querySelector('.qty').value) || 0;
+      const srp = parseFloat(row.querySelector('.srp').value) || 0;
+      const discType = row.querySelector('.discountType').value;
+      const discVal = parseFloat(row.querySelector('.discount').value) || 0;
+      const noDisc = qty * srp;
+      let discAmt = 0;
+      if (discType === 'percent') discAmt = noDisc * (discVal / 100);
+      else if (discType === 'amount') discAmt = discVal;
+      const total = Math.max(0, noDisc - discAmt);
+      row.querySelector('.discountAmt').value = discAmt.toFixed(2);
+      row.querySelector('.nodisc').value = noDisc.toFixed(2);
+      row.querySelector('.total').value = total.toFixed(2);
+      grand += total;
     });
+    totalField.value = grand.toFixed(2);
+  }
+
+  addRowBtn.addEventListener('click', addRow);
+
+  /* -------------------- Save booking -------------------- */
+  saveBookingBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    // gather items
+    const items = [];
+    orderBody.querySelectorAll('tr').forEach(row => {
+      items.push({
+        generic: row.querySelector('.generic').value || '',
+        brand: row.querySelector('.brand').value || '',
+        qty: row.querySelector('.qty').value || 0,
+        unit: row.querySelector('.unit').value || '',
+        srp: row.querySelector('.srp').value || 0,
+        discountType: row.querySelector('.discountType').value || '',
+        discount: row.querySelector('.discount').value || 0,
+        discountAmt: row.querySelector('.discountAmt').value || 0,
+        total: row.querySelector('.total').value || 0,
+        remarks: row.querySelector('.remarksItem').value || ''
+      });
+    });
+
+    const paymentType = (paymentSelect.value === 'Terms') ? `Terms (${termsDaysInput.value || '0'} days)` :
+                        (paymentSelect.value === 'Bank') ? `Bank - ${bankNameInput.value || ''}` :
+                        paymentSelect.value;
+
+    // timestamp
+    const createdAt = new Date().toLocaleString();
+
+    const record = {
+      name: nameInput.value || '',
+      contact: contactInput.value || '',
+      delivery: deliveryInput.value || '',
+      address: addressInput.value || '',
+      date: dateInput.value || '',
+      time: timeInput.value || '',
+      payment: paymentType,
+      distributor: distributorInput.value || '',
+      remarks: remarksInput.value || '',
+      total: totalField.value || '0.00',
+      items: items,
+      createdAt: createdAt
+    };
+
+    // save to localStorage
+    const records = JSON.parse(localStorage.getItem('bookings')) || [];
+    records.push(record);
+    localStorage.setItem('bookings', JSON.stringify(records));
+
+    // reset form (but don't lose theme etc.)
+    document.getElementById('bookingForm').reset();
+    orderBody.innerHTML = '';
+    addRow(); updateTotals();
+    totalField.value = '';
+
+    // reload list
+    loadRecords();
+    // focus name for quick input
+    nameInput.focus();
   });
 
-  let paymentType = paymentSelect.value;
-  if (paymentType === 'Terms') paymentType += ` (${termsDaysInput.value} days)`;
-  if (paymentType === 'Bank') paymentType += ` - ${bankNameInput.value}`;
+  /* -------------------- Load records to UI -------------------- */
+  function loadRecords() {
+    const records = JSON.parse(localStorage.getItem('bookings')) || [];
+    recordList.innerHTML = '';
+    if (records.length === 0) {
+      recordList.innerHTML = '<p style="color:var(--muted);">No bookings yet.</p>';
+      return;
+    }
 
-  const now = new Date().toLocaleString();
+    records.forEach((rec, idx) => {
+      const div = document.createElement('div');
+      div.className = 'record';
+      div.innerHTML = `
+        <h4>${escapeHtml(rec.name)} - ₱${rec.total}</h4>
+        <p>📞 ${escapeHtml(rec.contact)}<br>
+           🚚 ${escapeHtml(rec.delivery)}<br>
+           💳 ${escapeHtml(rec.payment)}<br>
+           🏢 ${escapeHtml(rec.distributor)}<br>
+           📍 ${escapeHtml(rec.address || 'N/A')}<br>
+           🕒 Created: ${escapeHtml(rec.createdAt || 'N/A')}</p>
+        <p><b>Remarks:</b> ${escapeHtml(rec.remarks || 'None')}</p>
 
-  const record = {
-    name: nameInput.value, contact: contactInput.value,
-    delivery: deliveryInput.value, address: addressInput.value,
-    date: dateInput.value, time: timeInput.value,
-    payment: paymentType, distributor: distributorInput.value,
-    remarks: remarksInput.value, total: totalField.value,
-    items, details: JSON.stringify(items, null, 2),
-    createdAt: now // <-- timestamp added
-  };
+        <div style="margin-top:8px;">
+          <button class="btn" onclick="downloadExcel(${idx})">📄 Export Excel</button>
+          <button class="btn" onclick="downloadJPEG(${idx})">🖼 View/Download JPEG</button>
+          <button class="btn danger" style="background:var(--danger)" onclick="deleteRecord(${idx})">🗑 Delete</button>
+        </div>
 
-  const records = JSON.parse(localStorage.getItem('bookings')) || [];
-  records.push(record);
-  localStorage.setItem('bookings', JSON.stringify(records));
-  loadRecords();
-  form.reset();
-  orderBody.innerHTML = '';
-  totalField.value = '';
-  termsDaysContainer.style.display = 'none';
-  bankContainer.style.display = 'none';
-});
+        <details style="margin-top:10px;">
+          <summary style="cursor:pointer;">View Items (${rec.items.length})</summary>
+          <div style="overflow:auto; margin-top:8px;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Disc Type</th><th>Disc Val</th><th>Disc Amt</th><th>Total</th><th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rec.items.map(item => `
+                  <tr>
+                    <td>${escapeHtml(item.generic)}</td>
+                    <td>${escapeHtml(item.brand)}</td>
+                    <td>${escapeHtml(item.qty)}</td>
+                    <td>${escapeHtml(item.unit)}</td>
+                    <td>${escapeHtml(item.srp)}</td>
+                    <td>${escapeHtml(item.discountType)}</td>
+                    <td>${escapeHtml(item.discount)}</td>
+                    <td>${escapeHtml(item.discountAmt)}</td>
+                    <td>${escapeHtml(item.total)}</td>
+                    <td>${escapeHtml(item.remarks)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      `;
+      recordList.appendChild(div);
+    });
+  }
 
-// --- LOAD RECORDS ---
-function loadRecords() {
-  const records = JSON.parse(localStorage.getItem('bookings')) || [];
-  summary.innerHTML = '';
-  records.forEach((rec,index) => {
-    const div = document.createElement('div');
-    div.classList.add('record');
-    div.innerHTML = `
-      <h4>${rec.name} - ₱${rec.total}</h4>
-      📞 ${rec.contact}<br>
-      🚚 ${rec.delivery}<br>
-      💳 ${rec.payment}<br>
-      🏢 ${rec.distributor}<br>
-      📍 ${rec.address || 'N/A'}<br>
-      🕒 Created: ${rec.createdAt || 'N/A'}<br>
-      <p>Remarks: ${rec.remarks || 'None'}</p>
-      <button class="delete-btn" onclick="deleteRecord(${index})">Delete</button>
-      <button class="btn" style="margin-top:5px;" onclick="downloadExcel(${index})">📄 Export Excel</button>
-      <button class="btn" style="margin-top:5px;" onclick="downloadJPEG(${index})">🖼 Export JPEG</button>
-      <details style="margin-top:8px;"><summary>View Details</summary>
-      <table>
-        <thead><tr>
-          <th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th>
-          <th>SRP</th><th>Discount Type</th><th>Discount Value</th>
-          <th>Discount Amt</th><th>Total</th><th>Remarks</th>
-        </tr></thead>
-        <tbody>
-          ${rec.items.map(item => `
-            <tr>
-              <td>${item.generic}</td>
-              <td>${item.brand}</td>
-              <td>${item.qty}</td>
-              <td>${item.unit}</td>
-              <td>${item.srp}</td>
-              <td>${item.discountType}</td>
-              <td>${item.discount}</td>
-              <td>${item.discountAmt}</td>
-              <td>${item.total}</td>
-              <td>${item.remarks}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table></details>`;
-    summary.appendChild(div);
-  });
-}
+  /* -------------------- Delete record -------------------- */
+  function deleteRecord(index) {
+    const records = JSON.parse(localStorage.getItem('bookings')) || [];
+    if (!records[index]) return;
+    if (!confirm('Delete this booking?')) return;
+    records.splice(index, 1);
+    localStorage.setItem('bookings', JSON.stringify(records));
+    loadRecords();
+  }
+  window.deleteRecord = deleteRecord; // expose to inline onclick
 
-// --- DELETE RECORD ---
-function deleteRecord(index) {
-  const records = JSON.parse(localStorage.getItem('bookings')) || [];
-  records.splice(index, 1);
-  localStorage.setItem('bookings', JSON.stringify(records));
-  loadRecords();
-}
+  /* -------------------- Export Excel -------------------- */
+  function downloadExcel(index) {
+    const records = JSON.parse(localStorage.getItem('bookings')) || [];
+    const rec = records[index];
+    if (!rec) return alert('Record not found.');
 
-// --- EXPORT EXCEL ---
-function downloadExcel(index) {
-  const records = JSON.parse(localStorage.getItem('bookings')) || [];
-  const rec = records[index];
+    // Prepare worksheet data
+    const wsData = [
+      ['Booking for', rec.name],
+      ['Contact', rec.contact],
+      ['Delivery', rec.delivery],
+      ['Address', rec.address || 'N/A'],
+      ['Preferred Date & Time', `${rec.date} ${rec.time}`],
+      ['Payment', rec.payment],
+      ['Distributor', rec.distributor],
+      ['Remarks', rec.remarks || 'None'],
+      ['Created At', rec.createdAt || 'N/A'],
+      [],
+      ['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']
+    ];
 
-  // --- Prepare worksheet data ---
-  const wsData = [
-    ['Booking for', rec.name],
-    ['Contact', rec.contact],
-    ['Delivery', rec.delivery],
-    ['Address', rec.address || 'N/A'],
-    ['Date & Time', `${rec.date} ${rec.time}`],
-    ['Payment', rec.payment],
-    ['Distributor', rec.distributor],
-    ['Remarks', rec.remarks || 'None'],
-    ['Created At', rec.createdAt || 'N/A'],
-    [],
-    ['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']
-  ];
+    rec.items.forEach(item => {
+      wsData.push([
+        item.generic, item.brand, item.qty, item.unit, item.srp,
+        item.discountType, item.discount, item.discountAmt, item.total, item.remarks
+      ]);
+    });
 
-  rec.items.forEach(item => {
-    wsData.push([
-      item.generic, item.brand, item.qty, item.unit, item.srp,
-      item.discountType, item.discount, item.discountAmt, item.total, item.remarks
-    ]);
-  });
+    wsData.push(['','','','','','','','','Total Amount', rec.total]);
 
-  // Add total in the last column of the table
-  const lastRowIndex = wsData.length;
-  wsData.push(['','','','','','','','','Total Amount', rec.total]);
+    // workbook & worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-  // --- Create workbook and worksheet ---
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
+    // auto column width
+    const headerRowIndex = 10;
+    const colWidths = wsData[headerRowIndex].map((_, i) => {
+      const max = Math.max(...wsData.map(r => (r[i] ? String(r[i]).length : 0)));
+      return { wch: Math.min(Math.max(max + 2, 10), 40) };
+    });
+    ws['!cols'] = colWidths;
 
-  // --- Auto-width columns ---
-  const colWidths = wsData[10].map((_, i) => {
-    return { wch: Math.max(...wsData.map(r => (r[i] ? r[i].toString().length : 0))) + 2 };
-  });
-  ws['!cols'] = colWidths;
-
-  XLSX.utils.book_append_sheet(wb, ws, 'Booking');
-
-  // --- Export Excel ---
-  // sanitize filename
-  const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
-  XLSX.writeFile(wb, `Booking_${safeName}_${rec.date || ''}.xlsx`);
-}
-
-// --- EXPORT JPEG ---
-function downloadJPEG(index) {
-  const records = JSON.parse(localStorage.getItem('bookings')) || [];
-  const rec = records[index];
-
-  const tempDiv = document.createElement('div');
-  tempDiv.style.padding = '20px';
-  tempDiv.style.background = '#fff';
-  tempDiv.style.width = '1000px';
-  tempDiv.style.fontFamily = 'Poppins, sans-serif';
-  tempDiv.style.fontSize = '13px';
-  tempDiv.innerHTML = `
-    <h2 style="color:#0d6efd; text-align:center;">📦 Booking Summary</h2>
-    <p><b>Booking for:</b> ${rec.name}</p>
-    <p><b>Contact:</b> ${rec.contact}</p>
-    <p><b>Delivery:</b> ${rec.delivery}</p>
-    <p><b>Address:</b> ${rec.address || 'N/A'}</p>
-    <p><b>Date & Time:</b> ${rec.date} ${rec.time}</p>
-    <p><b>Payment:</b> ${rec.payment}</p>
-    <p><b>Distributor:</b> ${rec.distributor}</p>
-    <p><b>Remarks / Special Instructions:</b> ${rec.remarks || 'None'}</p>
-    <p><b>Created At:</b> ${rec.createdAt || 'N/A'}</p>
-    <br>
-    <table border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse:collapse; text-align:center; table-layout:fixed;">
-      <thead style="background:#0d6efd; color:#fff;">
-        <tr>
-          <th>Generic</th>
-          <th>Brand</th>
-          <th>Qty</th>
-          <th>Unit</th>
-          <th>SRP</th>
-          <th>Discount Type</th>
-          <th>Discount Value</th>
-          <th>Discount Amt</th>
-          <th>Total</th>
-          <th style="max-width:200px; word-wrap:break-word;">Remarks</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rec.items.map(item => `
-          <tr>
-            <td>${item.generic}</td>
-            <td>${item.brand}</td>
-            <td>${item.qty}</td>
-            <td>${item.unit}</td>
-            <td>${item.srp}</td>
-            <td>${item.discountType}</td>
-            <td>${item.discount}</td>
-            <td>${item.discountAmt}</td>
-            <td>${item.total}</td>
-            <td style="white-space:normal; word-wrap:break-word; max-width:200px;">${item.remarks}</td>
-          </tr>
-        `).join('')}
-        <tr>
-          <td colspan="8" style="text-align:right; font-weight:bold;">Total Amount</td>
-          <td colspan="2" style="font-weight:bold;">₱${rec.total}</td>
-        </tr>
-      </tbody>
-    </table>
-  `;
-
-  document.body.appendChild(tempDiv);
-
-  html2canvas(tempDiv, {
-    scale: 3,
-    backgroundColor: '#ffffff',
-    useCORS: true
-  }).then(canvas => {
-    const link = document.createElement('a');
+    XLSX.utils.book_append_sheet(wb, ws, 'Booking');
     const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
-    link.download = `Booking_${safeName}_${rec.date || ''}.jpeg`;
-    link.href = canvas.toDataURL('image/jpeg', 1.0);
-    link.click();
-    document.body.removeChild(tempDiv);
-  });
-}
+    const filename = `Booking_${safeName}_${(rec.date || '')}.xlsx`;
+    XLSX.writeFile(wb, filename);
+  }
+  window.downloadExcel = downloadExcel;
 
-// --- INITIAL LOAD ---
-loadRecords();
-</script>
-</div>
+  /* -------------------- Export JPEG (cross-browser) -------------------- */
+  function downloadJPEG(index) {
+    const records = JSON.parse(localStorage.getItem('bookings')) || [];
+    const rec = records[index];
+    if (!rec) return alert('Record not found.');
+
+    // build temporary printable container
+    const tmp = document.createElement('div');
+    tmp.style.padding = '20px';
+    tmp.style.background = '#fff';
+    tmp.style.width = '1000px';
+    tmp.style.fontFamily = 'Poppins, sans-serif';
+    tmp.style.color = '#222';
+    tmp.style.fontSize = '13px';
+
+    // build html of summary + items
+    tmp.innerHTML = `
+      <h2 style="color:${getComputedStyle(document.documentElement).getPropertyValue('--main') || '#0d6efd'}; text-align:center; margin:0 0 12px;">📦 Booking Summary</h2>
+      <p><b>Booking for:</b> ${escapeHtml(rec.name)}</p>
+      <p><b>Contact:</b> ${escapeHtml(rec.contact)}</p>
+      <p><b>Delivery:</b> ${escapeHtml(rec.delivery)}</p>
+      <p><b>Address:</b> ${escapeHtml(rec.address || 'N/A')}</p>
+      <p><b>Preferred Date & Time:</b> ${escapeHtml(rec.date)} ${escapeHtml(rec.time)}</p>
+      <p><b>Payment:</b> ${escapeHtml(rec.payment)}</p>
+      <p><b>Distributor:</b> ${escapeHtml(rec.distributor)}</p>
+      <p><b>Remarks / Special Instructions:</b> ${escapeHtml(rec.remarks || 'None')}</p>
+      <p><b>Created At:</b> ${escapeHtml(rec.createdAt || 'N/A')}</p>
+      <br>
+      <table border="1" cellspacing="0" cellpadding="6" style="width:100%; border-collapse:collapse; text-align:center; table-layout:fixed;">
+        <thead style="background:${getComputedStyle(document.documentElement).getPropertyValue('--main') || '#0d6efd'}; color:#fff;">
+          <tr>
+            <th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Disc Type</th><th>Disc Val</th><th>Disc Amt</th><th>Total</th><th>Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rec.items.map(it => `
+            <tr>
+              <td>${escapeHtml(it.generic)}</td>
+              <td>${escapeHtml(it.brand)}</td>
+              <td>${escapeHtml(it.qty)}</td>
+              <td>${escapeHtml(it.unit)}</td>
+              <td>${escapeHtml(it.srp)}</td>
+              <td>${escapeHtml(it.discountType)}</td>
+              <td>${escapeHtml(it.discount)}</td>
+              <td>${escapeHtml(it.discountAmt)}</td>
+              <td>${escapeHtml(it.total)}</td>
+              <td style="white-space:normal; word-wrap:break-word; max-width:200px; text-align:left;">${escapeHtml(it.remarks)}</td>
+            </tr>
+          `).join('')}
+          <tr>
+            <td colspan="8" style="text-align:right; font-weight:bold;">Total Amount</td>
+            <td colspan="2" style="font-weight:bold;">₱${escapeHtml(rec.total)}</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    // append to DOM, convert to canvas
+    document.body.appendChild(tmp);
+    html2canvas(tmp, { scale: 3, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
+      const dataURL = canvas.toDataURL('image/jpeg', 1.0);
+      const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
+      const filename = `Booking_${safeName}_${(rec.date || '')}.jpeg`;
+
+      // detect platform
+      const ua = navigator.userAgent.toLowerCase();
+      const isIOS = /iphone|ipad|ipod/.test(ua);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+      if (isIOS && isSafari) {
+        // open in new tab for viewing (Safari blocks automatic download)
+        const newTab = window.open();
+        if (newTab) {
+          newTab.document.write(`<title>${escapeHtml(filename)}</title>`);
+          newTab.document.write('<img src="' + dataURL + '" style="max-width:100%;">');
+        } else {
+          // fallback: prompt user to long-press
+          alert('Safari blocked opening a new tab. You can still long-press the image to save it.');
+        }
+      } else {
+        // attempt download (works on Android / Desktop)
+        const a = document.createElement('a');
+        a.href = dataURL;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      // remove temp
+      document.body.removeChild(tmp);
+    }).catch(err => {
+      document.body.removeChild(tmp);
+      alert('Image export failed: ' + (err.message || err));
+      console.error(err);
+    });
+  }
+  window.downloadJPEG = downloadJPEG;
+
+  /* -------------------- helpers -------------------- */
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  /* -------------------- initial load -------------------- */
+  loadRecords();
+  </script>
 </body>
 </html>
