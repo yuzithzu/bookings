@@ -152,7 +152,10 @@ th { background: var(--main-color, #0d6efd); color: white; }
 <div id="recordList"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- jsPDF + autoTable -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
 <script>
 const addRowBtn = document.getElementById('addRow');
 const orderBody = document.getElementById('orderBody');
@@ -168,7 +171,7 @@ const navItems = document.querySelectorAll('.nav-item');
 const settingsDiv = document.querySelector('.settings');
 const themeSelect = document.getElementById('themeSelect');
 
-// Payment fields toggle
+// Payment toggle
 paymentSelect.addEventListener('change', () => {
 termsDaysContainer.style.display = paymentSelect.value === 'Terms' ? 'block' : 'none';
 bankContainer.style.display = paymentSelect.value === 'Bank' ? 'block' : 'none';
@@ -307,7 +310,7 @@ termsDaysContainer.style.display='none';
 bankContainer.style.display='none';
 });
 
-// Load and display records
+// Load records
 function loadRecords() {
 const records = JSON.parse(localStorage.getItem('bookings'))||[];
 summary.innerHTML='';
@@ -355,39 +358,40 @@ localStorage.setItem('bookings',JSON.stringify(records));
 loadRecords();
 }
 
-// Export PDF per transaction
+// PDF export using jsPDF + autoTable
 function downloadPDF(index){
 const records = JSON.parse(localStorage.getItem('bookings'))||[];
 const rec = records[index];
-const div = document.createElement('div');
-div.style.padding='10px';
-div.innerHTML=`<h2>${rec.name}</h2>
-<p>Contact: ${rec.contact}</p>
-<p>Delivery: ${rec.delivery}</p>
-<p>Address: ${rec.address || 'N/A'}</p>
-<p>Date/Time: ${rec.date} ${rec.time}</p>
-<p>Payment: ${rec.payment}</p>
-<p>Distributor: ${rec.distributor}</p>
-<p>Remarks: ${rec.remarks || 'None'}</p>
-<table>
-<thead><tr><th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Discount Type</th><th>Discount Value</th><th>Discount Amt</th><th>Total</th><th>Remarks</th></tr></thead>
-<tbody>
-${rec.items.map(item=>`<tr>
-<td>${item.generic}</td>
-<td>${item.brand}</td>
-<td>${item.qty}</td>
-<td>${item.unit}</td>
-<td>${item.srp}</td>
-<td>${item.discountType}</td>
-<td>${item.discount}</td>
-<td>${item.discountType==='percent'? (item.srp*item.qty*(item.discount/100)).toFixed(2) : item.discountType==='amount'? parseFloat(item.discount).toFixed(2) : 0}</td>
-<td>${item.total}</td>
-<td>${item.remarks}</td>
-</tr>`).join('')}
-</tbody>
-</table>
-<p style="text-align:right;font-weight:bold;margin-top:10px;">Total Amount: ₱${rec.total}</p>`;
-html2pdf().set({margin:0.5,filename:`Booking_${rec.name}_${rec.date}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(div).save();
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+let y = 20;
+doc.setFontSize(14);
+doc.text(`Booking for ${rec.name}`, 20, y);
+y+=10;
+doc.setFontSize(11);
+doc.text(`Contact: ${rec.contact}`, 20, y); y+=6;
+doc.text(`Delivery: ${rec.delivery}`, 20, y); y+=6;
+doc.text(`Address: ${rec.address || 'N/A'}`, 20, y); y+=6;
+doc.text(`Date/Time: ${rec.date} ${rec.time}`, 20, y); y+=6;
+doc.text(`Payment: ${rec.payment}`, 20, y); y+=6;
+doc.text(`Distributor: ${rec.distributor}`, 20, y); y+=6;
+doc.text(`Remarks: ${rec.remarks || 'None'}`, 20, y); y+=10;
+
+// Table
+const tableData = rec.items.map(item=>[
+item.generic, item.brand, item.qty, item.unit, item.srp,
+item.discountType, item.discount,
+(item.discountType==='percent'? (item.srp*item.qty*(item.discount/100)).toFixed(2) : item.discountType==='amount'? parseFloat(item.discount).toFixed(2) : 0),
+item.total, item.remarks
+]);
+doc.autoTable({
+head:[['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']],
+body:tableData,
+startY:y
+});
+y=doc.lastAutoTable.finalY+10;
+doc.text(`Total Amount: ₱${rec.total}`, 140, y);
+doc.save(`Booking_${rec.name}_${rec.date}.pdf`);
 }
 
 loadRecords();
