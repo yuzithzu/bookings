@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>📦 Booking App - Send to Viber</title>
   <style>
     * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -32,6 +32,20 @@
       margin-top: 25px; transition: 0.2s;
     }
     .btn:hover { background: #094fc0; }
+    #viberFallback {
+      display: none; text-align: center; margin-top: 15px;
+    }
+    #viberFallback a {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #25d366;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+    }
+    #viberFallback a:hover {
+      background: #1aa654;
+    }
     @media (max-width: 768px) {
       body { flex-direction: column; }
       .sidebar { flex-direction: row; width: 100%; justify-content: space-around; }
@@ -84,26 +98,33 @@
 
       <button class="btn" type="submit">Send to Viber</button>
     </form>
+
+    <div id="viberFallback">
+      <p>🔗 If Viber did not open automatically, tap below:</p>
+      <a id="manualViberLink" href="#" target="_blank">📱 Open in Viber</a>
+    </div>
   </div>
 
   <script>
     const form = document.getElementById('bookingForm');
+    const fallbackDiv = document.getElementById('viberFallback');
+    const manualLink = document.getElementById('manualViberLink');
 
-    form.addEventListener('submit', e => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      const name = document.getElementById('name').value;
-      const contact = document.getElementById('contact').value;
+      const name = document.getElementById('name').value.trim();
+      const contact = document.getElementById('contact').value.trim();
       const delivery = document.getElementById('delivery').value;
-      const address = document.getElementById('address').value;
+      const address = document.getElementById('address').value.trim();
       const date = document.getElementById('date').value;
       const time = document.getElementById('time').value;
-      const order = document.getElementById('order').value;
-      const total = document.getElementById('total').value;
-      const distributor = document.getElementById('distributor').value;
-      const remarks = document.getElementById('remarks').value;
+      const order = document.getElementById('order').value.trim();
+      const total = document.getElementById('total').value.trim();
+      const distributor = document.getElementById('distributor').value.trim();
+      const remarks = document.getElementById('remarks').value.trim();
 
-      const message =
+      const message = 
 `📦 *New Booking Form*
 👤 Name: ${name}
 📞 Contact: ${contact}
@@ -115,10 +136,24 @@
 🏢 Distributor: ${distributor}
 📝 Remarks: ${remarks}`;
 
-      const phone = "+639568663952"; // ✅ your public Viber number
+      const phone = "+639568663952"; // ✅ fixed public Viber number
       const viberLink = `viber://chat?number=${phone}&text=${encodeURIComponent(message)}`;
 
-      window.location.href = viberLink;
+      manualLink.href = viberLink;
+
+      // Try to open Viber automatically
+      let opened = false;
+      try {
+        window.location.href = viberLink;
+        opened = true;
+      } catch (err) {
+        opened = false;
+      }
+
+      // Show fallback after 1.5s if not opened (iPhone/Safari)
+      setTimeout(() => {
+        fallbackDiv.style.display = 'block';
+      }, 1500);
     });
   </script>
 
