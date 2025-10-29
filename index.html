@@ -33,7 +33,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--main-color, #0d6
 }
 .btn:hover { opacity: 0.9; }
 .table-responsive { overflow-x: auto; width: 100%; }
-.table-responsive table { width: 100%; min-width: 800px; border-collapse: collapse; }
+.table-responsive table { width: 100%; min-width: 900px; border-collapse: collapse; }
 table, th, td { border: 1px solid #ddd; padding: 6px; font-size: 13px; text-align: center; }
 th { background: var(--main-color, #0d6efd); color: white; }
 .summary-container {
@@ -49,9 +49,7 @@ th { background: var(--main-color, #0d6efd); color: white; }
   background: #fafbff;
 }
 .record h4 { margin: 0 0 5px; color: var(--main-color, #0d6efd); }
-.record table th, .record table td {
-  border: 1px solid #ddd; font-size: 12px; padding: 4px; text-align: center;
-}
+.record table th, .record table td { border: 1px solid #ddd; font-size: 12px; padding: 4px; text-align: center; }
 .delete-btn { background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
 .delete-btn:hover { background: #b02a37; }
 @media (max-width: 768px) {
@@ -60,7 +58,6 @@ th { background: var(--main-color, #0d6efd); color: white; }
   .sidebar h2 { font-size: 18px; margin: 0; }
   .nav-item { padding: 10px; font-size: 14px; }
   .main { padding: 15px; }
-  form { width: 100%; box-shadow: none; padding: 15px; border-radius: 0; }
   table, .record table { font-size: 11px; min-width: 700px; }
 }
 @media print { body { background: white; } .sidebar, .btn, .delete-btn, .settings { display: none; } .main { padding: 0; } .summary-container { max-height: none; overflow: visible; } }
@@ -152,7 +149,6 @@ th { background: var(--main-color, #0d6efd); color: white; }
 <div id="recordList"></div>
 </div>
 
-<!-- jsPDF + autoTable -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
@@ -183,8 +179,8 @@ const themeSelect = document.getElementById('themeSelect');
 
 // === PAYMENT TOGGLE ===
 paymentSelect.addEventListener('change', () => {
-termsDaysContainer.style.display = paymentSelect.value==='Terms'?'block':'none';
-bankContainer.style.display = paymentSelect.value==='Bank'?'block':'none';
+  termsDaysContainer.style.display = paymentSelect.value==='Terms'?'block':'none';
+  bankContainer.style.display = paymentSelect.value==='Bank'?'block':'none';
 });
 
 // === ADD ROW ===
@@ -198,8 +194,8 @@ function addRow() {
       <select class="unit" style="width:70px;">
         <option value="pcs">Pcs</option>
         <option value="box">Box</option>
-        <option value="pack">Pack</option>
-        <option value="tabs">Tabs</option>
+        <option value="Pfs">Pfs</option>
+        <option value="Vials">Vials</option>
       </select>
     </td>
     <td><input type="number" class="srp" min="0" value="0"></td>
@@ -269,15 +265,23 @@ form.addEventListener('submit', e=>{
 e.preventDefault();
 const items=[];
 document.querySelectorAll('#orderBody tr').forEach(row=>{
+const qty=parseFloat(row.querySelector('.qty').value)||0;
+const srp=parseFloat(row.querySelector('.srp').value)||0;
+const discountType=row.querySelector('.discountType').value;
+const discount=parseFloat(row.querySelector('.discount').value)||0;
+let discAmt=0,total=qty*srp;
+if(discountType==='percent'){discAmt=total*discount/100; total-=discAmt;}
+else if(discountType==='amount'){discAmt=discount; total-=discAmt;}
 items.push({
 generic: row.querySelector('.generic').value,
 brand: row.querySelector('.brand').value,
 qty: row.querySelector('.qty').value,
 unit: row.querySelector('.unit').value,
 srp: row.querySelector('.srp').value,
-discountType: row.querySelector('.discountType').value,
-discount: row.querySelector('.discount').value,
-total: row.querySelector('.total').value,
+discountType,
+discount,
+discountAmt:discAmt,
+total: total.toFixed(2),
 remarks: row.querySelector('.remarksItem').value
 });
 });
@@ -338,7 +342,7 @@ ${rec.items.map(item=>`<tr>
 <td>${item.srp}</td>
 <td>${item.discountType}</td>
 <td>${item.discount}</td>
-<td>${item.discountType==='percent'? (item.srp*item.qty*(item.discount/100)).toFixed(2) : item.discountType==='amount'? parseFloat(item.discount).toFixed(2) : 0}</td>
+<td>${item.discountAmt.toFixed(2)}</td>
 <td>${item.total}</td>
 <td>${item.remarks}</td>
 </tr>`).join('')}
@@ -377,15 +381,9 @@ doc.text(`Remarks: ${rec.remarks || 'None'}`,20,y); y+=10;
 
 // Table
 const tableData = rec.items.map(item=>[
-item.generic,item.brand,item.qty,item.unit,item.srp,item.discountType,item.discount,
-(item.discountType==='percent'? (item.srp*item.qty*(item.discount/100)).toFixed(2) : item.discountType==='amount'? parseFloat(item.discount).toFixed(2) : 0),
-item.total,item.remarks
+item.generic,item.brand,item.qty,item.unit,item.srp,item.discountType,item.discount,item.discountAmt.toFixed(2),item.total,item.remarks
 ]);
-doc.autoTable({
-head:[['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']],
-body:tableData,
-startY:y
-});
+doc.autoTable({head:[['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']],body:tableData,startY:y});
 y=doc.lastAutoTable.finalY+10;
 doc.text(`Total Amount: ₱${rec.total}`,140,y);
 doc.save(`Booking_${rec.name}_${rec.date}.pdf`);
@@ -393,7 +391,6 @@ doc.save(`Booking_${rec.name}_${rec.date}.pdf`);
 
 loadRecords();
 </script>
-
 </div>
 </body>
 </html>
