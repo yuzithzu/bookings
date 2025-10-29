@@ -239,8 +239,8 @@ function addRow() {
             <select class="unit" style="width:70px; margin-top:0;">
                 <option value="pcs">Pcs</option>
                 <option value="box">Box</option>
-                <option value="pack">Pack</option>
-                <option value="tabs">Tabs</option>
+                <option value="pfs">Pfs</option>
+                <option value="vials">Vials</option>
             </select>
         </td>
         <td><input type="number" class="srp" min="0" value="0"></td>
@@ -479,7 +479,7 @@ function deleteRecord(index) {
     loadRecords();
 }
 
-// === DOWNLOAD PDF PER TRANSACTION (REVISED WITH TWO TABLES) ===
+// === DOWNLOAD PDF PER TRANSACTION (REVISED FOR DATA INTEGRITY AND FIT) ===
 function downloadPDF(index) {
     const records = JSON.parse(localStorage.getItem('bookings')) || [];
     const rec = records[index];
@@ -490,7 +490,7 @@ function downloadPDF(index) {
     // --- 1. Title ---
     doc.setFontSize(18);
     doc.setTextColor(20, 20, 20);
-    doc.text(`BOOKING RECEIPT / SUMMARY`, 105, y, null, null, "center"); y += 10;
+    doc.text(`📦 BOOKING RECEIPT / SUMMARY`, 105, y, null, null, "center"); y += 10;
     
     // --- 2. Booking Info Table (Header Details) ---
     doc.setFontSize(10);
@@ -499,8 +499,8 @@ function downloadPDF(index) {
     const bookingInfoData = [
         ['Account Name (MD/Patient):', rec.name],
         ['Contact No.:', rec.contact],
-        ['Date & Time:', `${rec.date} ${rec.time}`],
-        ['Distributor & Branch:', rec.distributor],
+        ['Date & Time:', `${rec.date || 'N/A'} ${rec.time || 'N/A'}`], // Added N/A check
+        ['Distributor & Branch:', rec.distributor || 'N/A'], // Added N/A check
         ['Delivery Option:', rec.delivery],
         ['Payment Option:', rec.payment],
         ['Pick-Up / Delivery Address:', rec.address || 'N/A'],
@@ -512,11 +512,11 @@ function downloadPDF(index) {
         body: bookingInfoData,
         startY: y,
         theme: 'striped',
-        styles: { fontSize: 9, cellPadding: 2, lineWidth: 0.1, lineColor: 200 },
+        styles: { fontSize: 9, cellPadding: 2, overflow: 'linebreak' },
         headStyles: { fillColor: [13, 110, 253], textColor: 255, fontStyle: 'bold', fontSize: 11 },
         columnStyles: {
             0: { fontStyle: 'bold', cellWidth: 50 }, // Label column
-            1: { cellWidth: 'auto' } // Value column
+            1: { cellWidth: 'auto' } // Value column - set to auto to fill remaining width
         },
         margin: { top: 10, left: 10, right: 10, bottom: 10 },
     });
@@ -527,27 +527,36 @@ function downloadPDF(index) {
     doc.setFontSize(10);
     doc.text(`ORDER DETAILS`, 10, y); y += 5;
 
+    // Data verification for items table
     const orderData = rec.items.map(item => [
-        item.generic,
-        item.brand,
-        `${item.qty} ${item.unit}`,
-        item.srp,
-        item.discountType === 'percent' ? `${item.discount}%` : 'Fixed Amt',
-        item.discountAmt,
-        item.total
+        item.generic || '',
+        item.brand || '',
+        `${item.qty || '0'} ${item.unit || ''}`,
+        item.srp || '0',
+        item.discountType === 'percent' ? `${item.discount || '0'}%` : 'Fixed Amt',
+        item.discountAmt || '0.00',
+        item.total || '0.00',
+        item.remarks || ''
     ]);
     
     doc.autoTable({
-        head: [['Generic', 'Brand', 'Quantity', 'SRP', 'Disc Type', 'Disc Amt (₱)', 'Subtotal (₱)']],
+        head: [['Generic', 'Brand', 'Qty/Unit', 'SRP (₱)', 'Disc Type', 'Disc Amt (₱)', 'Subtotal (₱)', 'Remarks']],
         body: orderData,
         startY: y,
-        styles: { fontSize: 8.5 },
+        styles: { fontSize: 8.5, cellPadding: 1, overflow: 'linebreak' }, // Smaller font size and padding
         headStyles: { fillColor: [13, 110, 253], textColor: 255, fontStyle: 'bold' },
-        foot: [['', '', '', '', '', 'GRAND TOTAL (₱)', rec.total]],
+        foot: [['', '', '', '', '', 'GRAND TOTAL (₱)', rec.total, '']],
         footStyles: { fillColor: [200, 220, 255], textColor: 0, fontStyle: 'bold', fontSize: 10, halign: 'right' },
         columnStyles: {
-            5: { halign: 'right' },
-            6: { halign: 'right' }
+            // Setting custom widths/alignment for better fit
+            0: { cellWidth: 25 }, // Generic
+            1: { cellWidth: 25 }, // Brand
+            2: { cellWidth: 20 }, // Qty/Unit
+            3: { cellWidth: 15, halign: 'right' }, // SRP
+            4: { cellWidth: 15 }, // Disc Type
+            5: { cellWidth: 18, halign: 'right' }, // Disc Amt
+            6: { cellWidth: 18, halign: 'right' }, // Subtotal
+            7: { cellWidth: 'auto' } // Remarks (takes remaining space)
         },
         margin: { top: 10, left: 10, right: 10, bottom: 10 },
     });
