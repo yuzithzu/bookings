@@ -479,7 +479,7 @@ function deleteRecord(index) {
     loadRecords();
 }
 
-// === DOWNLOAD PDF PER TRANSACTION (FIXED) ===
+// === DOWNLOAD PDF PER TRANSACTION (REVISED WITH TWO TABLES) ===
 function downloadPDF(index) {
     const records = JSON.parse(localStorage.getItem('bookings')) || [];
     const rec = records[index];
@@ -487,59 +487,67 @@ function downloadPDF(index) {
     const doc = new jsPDF();
     let y = 20;
 
-    // --- PDF Header Information ---
-    doc.setFontSize(16);
+    // --- 1. Title ---
+    doc.setFontSize(18);
     doc.setTextColor(20, 20, 20);
-    doc.text(`📦 BOOKING SUMMARY`, 105, y, null, null, "center"); y += 10;
+    doc.text(`BOOKING RECEIPT / SUMMARY`, 105, y, null, null, "center"); y += 10;
     
-    doc.setFontSize(11);
+    // --- 2. Booking Info Table (Header Details) ---
+    doc.setFontSize(10);
     doc.setTextColor(50, 50, 50);
 
-    // Two-column layout for main details
-    const col1_x = 20;
-    const col2_x = 110;
-    const line_height = 6;
+    const bookingInfoData = [
+        ['Account Name (MD/Patient):', rec.name],
+        ['Contact No.:', rec.contact],
+        ['Date & Time:', `${rec.date} ${rec.time}`],
+        ['Distributor & Branch:', rec.distributor],
+        ['Delivery Option:', rec.delivery],
+        ['Payment Option:', rec.payment],
+        ['Pick-Up / Delivery Address:', rec.address || 'N/A'],
+        ['Remarks / Instructions:', rec.remarks || 'None'],
+    ];
+
+    doc.autoTable({
+        head: [['Booking Information']],
+        body: bookingInfoData,
+        startY: y,
+        theme: 'striped',
+        styles: { fontSize: 9, cellPadding: 2, lineWidth: 0.1, lineColor: 200 },
+        headStyles: { fillColor: [13, 110, 253], textColor: 255, fontStyle: 'bold', fontSize: 11 },
+        columnStyles: {
+            0: { fontStyle: 'bold', cellWidth: 50 }, // Label column
+            1: { cellWidth: 'auto' } // Value column
+        },
+        margin: { top: 10, left: 10, right: 10, bottom: 10 },
+    });
     
-    doc.text(`Account Name: ${rec.name}`, col1_x, y);
-    doc.text(`Contact No: ${rec.contact}`, col2_x, y); y += line_height;
+    y = doc.lastAutoTable.finalY + 10;
     
-    doc.text(`Date/Time: ${rec.date} ${rec.time}`, col1_x, y);
-    doc.text(`Payment: ${rec.payment}`, col2_x, y); y += line_height;
+    // --- 3. Order Details Table ---
+    doc.setFontSize(10);
+    doc.text(`ORDER DETAILS`, 10, y); y += 5;
 
-    doc.text(`Delivery Option: ${rec.delivery}`, col1_x, y);
-    doc.text(`Distributor & Branch: ${rec.distributor}`, col2_x, y); y += line_height;
-
-    doc.text(`Pick-Up / Delivery Address: ${rec.address || 'N/A'}`, col1_x, y); y += line_height;
-    
-    // Remarks at the bottom of the header
-    y += line_height * 0.5; // Small spacer
-    doc.text(`Remarks / Instructions: ${rec.remarks || 'None'}`, col1_x, y); y += 10;
-
-
-    // --- Table Data ---
-    const tableData = rec.items.map(item => [
+    const orderData = rec.items.map(item => [
         item.generic,
         item.brand,
-        `${item.qty} ${item.unit}`, // Combined Qty and Unit
+        `${item.qty} ${item.unit}`,
         item.srp,
-        item.discountType === 'percent' ? `${item.discount}%` : 'Fixed Amt', // Simplified Discount Type display
+        item.discountType === 'percent' ? `${item.discount}%` : 'Fixed Amt',
         item.discountAmt,
-        item.total,
-        item.remarks
+        item.total
     ]);
     
-    // Autotable
     doc.autoTable({
-        head: [['Generic', 'Brand', 'Quantity', 'SRP', 'Discount Type', 'Discount Amt', 'Total', 'Remarks']],
-        body: tableData,
+        head: [['Generic', 'Brand', 'Quantity', 'SRP', 'Disc Type', 'Disc Amt (₱)', 'Subtotal (₱)']],
+        body: orderData,
         startY: y,
         styles: { fontSize: 8.5 },
-        headStyles: { fillColor: [13, 110, 253], textColor: 255, fontStyle: 'bold' }, // Blue header
-        // Use the 'foot' option to place the grand total inside the table structure
-        foot: [['', '', '', '', '', 'GRAND TOTAL (₱)', rec.total, '']],
-        footStyles: { fillColor: [200, 220, 255], textColor: 0, fontStyle: 'bold', fontSize: 10 }, // Lighter blue footer
+        headStyles: { fillColor: [13, 110, 253], textColor: 255, fontStyle: 'bold' },
+        foot: [['', '', '', '', '', 'GRAND TOTAL (₱)', rec.total]],
+        footStyles: { fillColor: [200, 220, 255], textColor: 0, fontStyle: 'bold', fontSize: 10, halign: 'right' },
         columnStyles: {
-            6: { halign: 'right' } // Align Total column to the right
+            5: { halign: 'right' },
+            6: { halign: 'right' }
         },
         margin: { top: 10, left: 10, right: 10, bottom: 10 },
     });
