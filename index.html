@@ -1,486 +1,365 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📦 Booking App</title>
-  <style>
-    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body { margin: 0; display: flex; height: 100vh; background: #f4f6f9; }
-    .sidebar {
-      width: 230px; background: var(--sidebar-color, #0d6efd); color: white;
-      display: flex; flex-direction: column; align-items: center; padding: 20px 0;
-    }
-    .sidebar h2 { font-size: 20px; margin-bottom: 40px; }
-    .nav-item { width: 100%; text-align: center; padding: 12px 0; cursor: pointer; transition: 0.2s; }
-    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.15); }
-    .main { flex: 1; padding: 30px; overflow-y: auto; }
-    h1 { color: var(--main-color, #0d6efd); text-align: center; margin-bottom: 20px; }
-    form {
-      background: #fff; padding: 20px; border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 900px; margin: auto;
-    }
-    label { font-weight: 600; margin-top: 10px; display: block; }
-    input, textarea, select {
-      width: 100%; padding: 8px; margin-top: 6px;
-      border: 1px solid #ccc; border-radius: 8px; font-size: 14px;
-    }
-    input:focus, textarea:focus, select:focus { border-color: var(--main-color, #0d6efd); outline: none; }
-    .btn {
-      width: 100%; background: var(--btn-color, #0d6efd); color: white; border: none;
-      border-radius: 8px; padding: 10px; font-size: 16px; cursor: pointer;
-      margin-top: 15px; transition: 0.2s;
-    }
-    .btn:hover { opacity: 0.9; }
-    table {
-      width: 100%; border-collapse: collapse; margin-top: 15px;
-    }
-    th, td {
-      border: 1px solid #ddd; padding: 6px; font-size: 13px; text-align: center;
-    }
-    th { background: var(--main-color, #0d6efd); color: white; }
-    .summary-container {
-      background: #fff; padding: 15px; border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      margin-top: 20px; max-height: 300px; overflow-y: auto;
-    }
-    .record {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 10px 12px;
-      margin-bottom: 12px;
-      background: #fafbff;
-    }
-    .record h4 {
-      margin: 0 0 5px;
-      color: var(--main-color, #0d6efd);
-    }
-    .record table th, .record table td {
-      border: 1px solid #ddd;
-      font-size: 12px;
-      padding: 4px;
-      text-align: center;
-    }
-    .delete-btn {
-      background: #dc3545; color: white; border: none;
-      padding: 4px 8px; border-radius: 6px; cursor: pointer;
-    }
-    .delete-btn:hover { background: #b02a37; }
-
-    /* TABLE RESPONSIVE */
-    .table-responsive {
-      overflow-x: auto;
-      width: 100%;
-    }
-    .table-responsive table {
-      width: 100%;
-      min-width: 700px;
-      border-collapse: collapse;
-    }
-
-    /* MOBILE RESPONSIVE */
-    @media (max-width: 768px) {
-      body {
-        flex-direction: column;
-        height: auto;
-      }
-      .sidebar {
-        width: 100%;
-        flex-direction: row;
-        justify-content: space-around;
-        padding: 10px 0;
-      }
-      .sidebar h2 { font-size: 18px; margin: 0; }
-      .nav-item { padding: 10px; font-size: 14px; }
-      .main { padding: 15px; }
-      form {
-        width: 100%;
-        box-shadow: none;
-        padding: 15px;
-        border-radius: 0;
-      }
-      table, .record table { font-size: 11px; }
-    }
-
-    @media print {
-      body { background: white; }
-      .sidebar, .btn, .delete-btn, .settings { display: none; }
-      .main { padding: 0; }
-      .summary-container { max-height: none; overflow: visible; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>📦 Booking App</title>
+<style>
+* { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+body { margin: 0; display: flex; height: 100vh; background: #f4f6f9; }
+.sidebar {
+  width: 230px; background: var(--sidebar-color, #0d6efd); color: white;
+  display: flex; flex-direction: column; align-items: center; padding: 20px 0;
+}
+.sidebar h2 { font-size: 20px; margin-bottom: 40px; }
+.nav-item { width: 100%; text-align: center; padding: 12px 0; cursor: pointer; transition: 0.2s; }
+.nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.15); }
+.main { flex: 1; padding: 30px; overflow-y: auto; }
+h1 { color: var(--main-color, #0d6efd); text-align: center; margin-bottom: 20px; }
+form {
+  background: #fff; padding: 20px; border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 900px; margin: auto;
+}
+label { font-weight: 600; margin-top: 10px; display: block; }
+input, textarea, select {
+  width: 100%; padding: 8px; margin-top: 6px;
+  border: 1px solid #ccc; border-radius: 8px; font-size: 14px;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--main-color, #0d6efd); outline: none; }
+.btn {
+  width: 100%; background: var(--btn-color, #0d6efd); color: white; border: none;
+  border-radius: 8px; padding: 10px; font-size: 16px; cursor: pointer;
+  margin-top: 15px; transition: 0.2s;
+}
+.btn:hover { opacity: 0.9; }
+.table-responsive { overflow-x: auto; width: 100%; }
+.table-responsive table { width: 100%; min-width: 700px; border-collapse: collapse; }
+table, th, td { border: 1px solid #ddd; padding: 6px; font-size: 13px; text-align: center; }
+th { background: var(--main-color, #0d6efd); color: white; }
+.summary-container {
+  background: #fff; padding: 15px; border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-top: 20px; max-height: 400px; overflow-y: auto;
+}
+.record {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: #fafbff;
+}
+.record h4 { margin: 0 0 5px; color: var(--main-color, #0d6efd); }
+.record table th, .record table td {
+  border: 1px solid #ddd; font-size: 12px; padding: 4px; text-align: center;
+}
+.delete-btn { background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
+.delete-btn:hover { background: #b02a37; }
+@media (max-width: 768px) {
+  body { flex-direction: column; height: auto; }
+  .sidebar { width: 100%; flex-direction: row; justify-content: space-around; padding: 10px 0; }
+  .sidebar h2 { font-size: 18px; margin: 0; }
+  .nav-item { padding: 10px; font-size: 14px; }
+  .main { padding: 15px; }
+  form { width: 100%; box-shadow: none; padding: 15px; border-radius: 0; }
+  table, .record table { font-size: 11px; }
+}
+@media print { body { background: white; } .sidebar, .btn, .delete-btn, .settings { display: none; } .main { padding: 0; } .summary-container { max-height: none; overflow: visible; } }
+</style>
 </head>
 <body>
 
-  <div class="sidebar">
-    <h2>📦 Booking App</h2>
-    <div class="nav-item active">New Booking</div>
-    <div class="nav-item">Settings</div>
-  </div>
+<div class="sidebar">
+  <h2>📦 Booking App</h2>
+  <div class="nav-item active">New Booking</div>
+  <div class="nav-item">Settings</div>
+</div>
 
-  <div class="main">
-    <h1>Booking Form</h1>
-    <form id="bookingForm">
-      <label>Name of Account (MD/Patient):</label>
-      <input type="text" id="name" required>
+<div class="main">
+<h1>Booking Form</h1>
+<form id="bookingForm">
+<label>Name of Account (MD/Patient):</label>
+<input type="text" id="name" required>
+<label>Contact Number:</label>
+<input type="tel" id="contact" required>
+<label>Delivery Option:</label>
+<select id="delivery">
+<option>Pick-Up (by client at office)</option>
+<option>Delivery (by branch rider to client)</option>
+<option selected>Pick-Up by Lalamove / Grab / Courier</option>
+</select>
+<label>Pick-Up / Delivery Address:</label>
+<textarea id="address" rows="2"></textarea>
+<label>Preferred Date & Time:</label>
+<input type="date" id="date"> <input type="time" id="time">
+<label>Payment Option:</label>
+<select id="payment">
+<option value="C.O.D">C.O.D (Cash on Delivery)</option>
+<option value="Terms">Terms</option>
+<option value="PDC">PDC (Post Dated Check)</option>
+<option value="Bank">Deposited thru Bank</option>
+</select>
+<div id="termsDaysContainer" style="display:none;">
+<label>Terms (Days):</label>
+<input type="number" id="termsDays" min="1" placeholder="Enter number of days">
+</div>
+<div id="bankContainer" style="display:none;">
+<label>Bank Name:</label>
+<input type="text" id="bankName" placeholder="e.g. BPI, BDO, Metrobank">
+</div>
+<label>Order Details:</label>
+<div class="table-responsive">
+<table id="orderTable">
+<thead>
+<tr>
+<th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Discount (%)</th><th>Discount Amt</th><th>No Discount</th><th>Remarks</th><th>Total</th><th>🗑</th>
+</tr>
+</thead>
+<tbody id="orderBody"></tbody>
+</table>
+</div>
+<button type="button" class="btn" id="addRow">+ Add Item</button>
+<label>Total Amount (₱):</label>
+<input type="number" id="total" readonly>
+<label>Distributor & Branch:</label>
+<input type="text" id="distributor">
+<label>Remarks / Special Instructions:</label>
+<textarea id="remarks" rows="3"></textarea>
+<button class="btn" type="submit">Save Booking</button>
+</form>
 
-      <label>Contact Number:</label>
-      <input type="tel" id="contact" required>
+<div class="settings" style="display:none; margin-top:20px; text-align:center;">
+<label for="themeSelect" style="color:white;">Choose Theme:</label>
+<select id="themeSelect" style="padding:5px; border-radius:5px;">
+<option value="default">Blue (Default)</option>
+<option value="black">Black</option>
+<option value="red">Red</option>
+<option value="yellow">Yellow</option>
+</select>
+</div>
 
-      <label>Delivery Option:</label>
-      <select id="delivery">
-        <option>Pick-Up (by client at office)</option>
-        <option>Delivery (by branch rider to client)</option>
-        <option selected>Pick-Up by Lalamove / Grab / Courier</option>
-      </select>
+<div class="summary-container" id="summaryContainer">
+<h3>Saved Bookings</h3>
+<div id="recordList"></div>
+</div>
 
-      <label>Pick-Up / Delivery Address:</label>
-      <textarea id="address" rows="2"></textarea>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+const addRowBtn = document.getElementById('addRow');
+const orderBody = document.getElementById('orderBody');
+const totalField = document.getElementById('total');
+const form = document.getElementById('bookingForm');
+const summary = document.getElementById('recordList');
+const paymentSelect = document.getElementById('payment');
+const termsDaysContainer = document.getElementById('termsDaysContainer');
+const bankContainer = document.getElementById('bankContainer');
+const termsDaysInput = document.getElementById('termsDays');
+const bankNameInput = document.getElementById('bankName');
+const navItems = document.querySelectorAll('.nav-item');
+const settingsDiv = document.querySelector('.settings');
+const themeSelect = document.getElementById('themeSelect');
 
-      <label>Preferred Date & Time:</label>
-      <input type="date" id="date"> <input type="time" id="time">
+// PAYMENT SHOW/HIDE
+paymentSelect.addEventListener('change', () => {
+termsDaysContainer.style.display = paymentSelect.value === 'Terms' ? 'block' : 'none';
+bankContainer.style.display = paymentSelect.value === 'Bank' ? 'block' : 'none';
+});
 
-      <label>Payment Option:</label>
-      <select id="payment">
-        <option value="C.O.D">C.O.D (Cash on Delivery)</option>
-        <option value="Terms">Terms</option>
-        <option value="PDC">PDC (Post Dated Check)</option>
-        <option value="Bank">Deposited thru Bank</option>
-      </select>
+// ADD ROW
+function addRow() {
+  const row = document.createElement('tr');
+  row.innerHTML = `<td><input class="generic" type="text"></td>
+  <td><input class="brand" type="text"></td>
+  <td><input class="qty" type="number" min="1" value="1"></td>
+  <td><input class="srp" type="number" min="0" value="0"></td>
+  <td><input class="discount" type="number" min="0" max="100" value="0"></td>
+  <td><input class="discountAmt" readonly></td>
+  <td><input class="nodisc" readonly></td>
+  <td><input class="remarksItem" type="text"></td>
+  <td><input class="total" readonly></td>
+  <td><button type="button" class="deleteRow">❌</button></td>`;
+  orderBody.appendChild(row);
+  updateTotals();
+}
 
-      <div id="termsDaysContainer" style="display:none;">
-        <label>Terms (Days):</label>
-        <input type="number" id="termsDays" min="1" placeholder="Enter number of days">
-      </div>
+function updateTotals() {
+let grandTotal = 0;
+document.querySelectorAll('#orderBody tr').forEach(row=>{
+const qty = parseFloat(row.querySelector('.qty').value)||0;
+const srp = parseFloat(row.querySelector('.srp').value)||0;
+const discount = parseFloat(row.querySelector('.discount').value)||0;
+const discAmt = (srp*qty)*(discount/100);
+const noDisc = srp*qty;
+const total = noDisc-discAmt;
+row.querySelector('.discountAmt').value=discAmt.toFixed(2);
+row.querySelector('.nodisc').value=noDisc.toFixed(2);
+row.querySelector('.total').value=total.toFixed(2);
+grandTotal+=total;
+});
+totalField.value=grandTotal.toFixed(2);
+}
 
-      <div id="bankContainer" style="display:none;">
-        <label>Bank Name:</label>
-        <input type="text" id="bankName" placeholder="e.g. BPI, BDO, Metrobank">
-      </div>
+orderBody.addEventListener('input',e=>{
+if(['qty','srp','discount'].includes(e.target.className)) updateTotals();
+});
 
-      <label>Order Details:</label>
-      <div class="table-responsive">
-        <table id="orderTable">
-          <thead>
-            <tr>
-              <th>Generic</th>
-              <th>Brand</th>
-              <th>Qty</th>
-              <th>SRP</th>
-              <th>Discount (%)</th>
-              <th>Discount Amt</th>
-              <th>No Discount</th>
-              <th>Remarks</th>
-              <th>Total</th>
-              <th>🗑</th>
-            </tr>
-          </thead>
-          <tbody id="orderBody"></tbody>
-        </table>
-      </div>
-      <button type="button" class="btn" id="addRow">+ Add Item</button>
+orderBody.addEventListener('click',e=>{
+if(e.target.classList.contains('deleteRow')){e.target.closest('tr').remove();updateTotals();}
+});
 
-      <label>Total Amount (₱):</label>
-      <input type="number" id="total" readonly>
+addRowBtn.addEventListener('click', addRow);
 
-      <label>Distributor & Branch:</label>
-      <input type="text" id="distributor">
+// NAVIGATION
+navItems.forEach(item=>{
+item.addEventListener('click', ()=>{
+navItems.forEach(i=>i.classList.remove('active'));
+item.classList.add('active');
+settingsDiv.style.display = item.textContent.trim() === 'Settings'? 'block':'none';
+});
+});
 
-      <label>Remarks / Special Instructions:</label>
-      <textarea id="remarks" rows="3"></textarea>
+// THEME
+themeSelect.addEventListener('change', () => {
+  const theme = themeSelect.value;
+  if(theme==='default'){document.documentElement.style.setProperty('--sidebar-color','#0d6efd');document.documentElement.style.setProperty('--main-color','#0d6efd');document.documentElement.style.setProperty('--btn-color','#0d6efd');}
+  else if(theme==='black'){document.documentElement.style.setProperty('--sidebar-color','#333');document.documentElement.style.setProperty('--main-color','#000');document.documentElement.style.setProperty('--btn-color','#555');}
+  else if(theme==='red'){document.documentElement.style.setProperty('--sidebar-color','#dc3545');document.documentElement.style.setProperty('--main-color','#b02a37');document.documentElement.style.setProperty('--btn-color','#dc3545');}
+  else if(theme==='yellow'){document.documentElement.style.setProperty('--sidebar-color','#ffc107');document.documentElement.style.setProperty('--main-color','#e0a800');document.documentElement.style.setProperty('--btn-color','#ffc107');}
+});
 
-      <button class="btn" type="submit">Save Booking</button>
-    </form>
+// SAVE FORM
+form.addEventListener('submit', e=>{
+e.preventDefault();
+const items=[];
+document.querySelectorAll('#orderBody tr').forEach(row=>{
+items.push({
+generic:row.querySelector('.generic').value,
+brand:row.querySelector('.brand').value,
+qty:row.querySelector('.qty').value,
+srp:row.querySelector('.srp').value,
+discount:row.querySelector('.discount').value,
+total:row.querySelector('.total').value,
+remarks:row.querySelector('.remarksItem').value
+});
+});
+let paymentType=paymentSelect.value;
+if(paymentType==='Terms') paymentType+=` (${termsDaysInput.value} days)`;
+if(paymentType==='Bank') paymentType+=` - ${bankNameInput.value}`;
 
-    <div class="settings" style="display:none; margin-top:20px; text-align:center;">
-      <label for="themeSelect" style="color:white;">Choose Theme:</label>
-      <select id="themeSelect" style="padding:5px; border-radius:5px;">
-        <option value="default">Blue (Default)</option>
-        <option value="black">Black</option>
-        <option value="red">Red</option>
-        <option value="yellow">Yellow</option>
-      </select>
-    </div>
+const record={
+name:name.value,
+contact:contact.value,
+delivery:delivery.value,
+address:address.value,
+date:date.value,
+time:time.value,
+payment:paymentType,
+distributor:distributor.value,
+remarks:remarks.value,
+total:totalField.value,
+items,
+details: JSON.stringify(items,null,2)
+};
 
-    <div class="summary-container" id="summaryContainer">
-      <h3>Saved Bookings</h3>
-      <div id="recordList"></div>
-    </div>
-  </div>
+const records = JSON.parse(localStorage.getItem('bookings'))||[];
+records.push(record);
+localStorage.setItem('bookings',JSON.stringify(records));
+loadRecords();
+form.reset();
+orderBody.innerHTML='';
+totalField.value='';
+termsDaysContainer.style.display='none';
+bankContainer.style.display='none';
+});
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script>
-    const addRowBtn = document.getElementById('addRow');
-    const orderBody = document.getElementById('orderBody');
-    const totalField = document.getElementById('total');
-    const form = document.getElementById('bookingForm');
-    const summary = document.getElementById('recordList');
-    const paymentSelect = document.getElementById('payment');
-    const termsDaysContainer = document.getElementById('termsDaysContainer');
-    const bankContainer = document.getElementById('bankContainer');
-    const termsDaysInput = document.getElementById('termsDays');
-    const bankNameInput = document.getElementById('bankName');
+// LOAD RECORDS
+function loadRecords() {
+const records = JSON.parse(localStorage.getItem('bookings'))||[];
+summary.innerHTML='';
+records.forEach((rec,index)=>{
+const div=document.createElement('div');
+div.classList.add('record');
+div.innerHTML=`<h4>${rec.name} - ₱${rec.total}</h4>
+📞 ${rec.contact}<br>
+🚚 ${rec.delivery}<br>
+💳 ${rec.payment}<br>
+🏢 ${rec.distributor}<br>
+📍 ${rec.address || 'N/A'}<br>
+<p>Remarks: ${rec.remarks || 'None'}</p>
+<button class="delete-btn" onclick="deleteRecord(${index})">Delete</button>
+<button class="btn" onclick="exportRecordPDF(${index})" style="margin-top:5px;">📄 Export PDF</button>
+<details style="margin-top:5px;"><summary>Order Items</summary>
+<div class="table-responsive">
+<table>
+<thead><tr><th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Discount %</th><th>Discount Amt</th><th>Total</th><th>Remarks</th></tr></thead>
+<tbody>
+${rec.items.map(item=>`<tr>
+<td>${item.generic}</td>
+<td>${item.brand}</td>
+<td>${item.qty}</td>
+<td>${item.srp}</td>
+<td>${item.discount}</td>
+<td>${(item.srp*item.qty*(item.discount/100)).toFixed(2)}</td>
+<td>${item.total}</td>
+<td>${item.remarks}</td>
+</tr>`).join('')}
+</tbody>
+</table></div></details>`;
+summary.appendChild(div);
+});
+}
 
-    const navItems = document.querySelectorAll('.nav-item');
-    const settingsDiv = document.querySelector('.settings');
-    const themeSelect = document.getElementById('themeSelect');
+function deleteRecord(index){
+const records = JSON.parse(localStorage.getItem('bookings'))||[];
+records.splice(index,1);
+localStorage.setItem('bookings',JSON.stringify(records));
+loadRecords();
+}
 
-    // PAYMENT SHOW/HIDE
-    paymentSelect.addEventListener('change', () => {
-      termsDaysContainer.style.display = paymentSelect.value === 'Terms' ? 'block' : 'none';
-      bankContainer.style.display = paymentSelect.value === 'Bank' ? 'block' : 'none';
-    });
+// EXPORT PDF per transaction
+function exportRecordPDF(index){
+const records = JSON.parse(localStorage.getItem('bookings'))||[];
+const rec = records[index];
+const div=document.createElement('div');
+div.innerHTML=`<div style="font-family:Poppins,sans-serif;padding:20px;">
+<h1 style="text-align:center;color:#0d6efd;">Booking Summary</h1>
+<p><strong>Name:</strong> ${rec.name}</p>
+<p><strong>Contact:</strong> ${rec.contact}</p>
+<p><strong>Delivery:</strong> ${rec.delivery}</p>
+<p><strong>Address:</strong> ${rec.address || 'N/A'}</p>
+<p><strong>Date & Time:</strong> ${rec.date || 'N/A'} ${rec.time || ''}</p>
+<p><strong>Payment:</strong> ${rec.payment}</p>
+<p><strong>Distributor:</strong> ${rec.distributor || 'N/A'}</p>
+<p><strong>Remarks:</strong> ${rec.remarks || 'None'}</p>
+<table style="width:100%;border-collapse:collapse;margin-top:15px;border:1px solid #ddd;">
+<thead><tr style="background:#0d6efd;color:white;">
+<th style="border:1px solid #ddd;padding:6px;">Generic</th>
+<th style="border:1px solid #ddd;padding:6px;">Brand</th>
+<th style="border:1px solid #ddd;padding:6px;">Qty</th>
+<th style="border:1px solid #ddd;padding:6px;">SRP</th>
+<th style="border:1px solid #ddd;padding:6px;">Discount %</th>
+<th style="border:1px solid #ddd;padding:6px;">Discount Amt</th>
+<th style="border:1px solid #ddd;padding:6px;">Total</th>
+<th style="border:1px solid #ddd;padding:6px;">Remarks</th>
+</tr></thead>
+<tbody>
+${rec.items.map(item=>`<tr>
+<td style="border:1px solid #ddd;padding:4px;">${item.generic}</td>
+<td style="border:1px solid #ddd;padding:4px;">${item.brand}</td>
+<td style="border:1px solid #ddd;padding:4px;">${item.qty}</td>
+<td style="border:1px solid #ddd;padding:4px;">${item.srp}</td>
+<td style="border:1px solid #ddd;padding:4px;">${item.discount}</td>
+<td style="border:1px solid #ddd;padding:4px;">${(item.srp*item.qty*(item.discount/100)).toFixed(2)}</td>
+<td style="border:1px solid #ddd;padding:4px;">${item.total}</td>
+<td style="border:1px solid #ddd;padding:4px;">${item.remarks}</td>
+</tr>`).join('')}
+</tbody>
+</table>
+<p style="text-align:right;font-weight:bold;margin-top:10px;">Total Amount: ₱${rec.total}</p>
+</div>`;
+html2pdf().set({margin:0.5,filename:`Booking_${rec.name}_${rec.date}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(div).save();
+}
 
-    // ADD ROW
-    function addRow() {
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td><input type="text" class="generic"></td>
-        <td><input type="text" class="brand"></td>
-        <td><input type="number" class="qty" min="1" value="1"></td>
-        <td><input type="number" class="srp" min="0" value="0"></td>
-        <td><input type="number" class="discount" min="0" max="100" value="0"></td>
-        <td><input type="number" class="discountAmt" readonly></td>
-        <td><input type="number" class="nodisc" readonly></td>
-        <td><input type="text" class="remarksItem"></td>
-        <td><input type="number" class="total" readonly></td>
-        <td><button type="button" class="deleteRow">❌</button></td>
-      `;
-      orderBody.appendChild(row);
-      updateTotals();
-    }
-
-    // UPDATE TOTALS
-    function updateTotals() {
-      let grandTotal = 0;
-      document.querySelectorAll('#orderBody tr').forEach(row => {
-        const qty = parseFloat(row.querySelector('.qty').value) || 0;
-        const srp = parseFloat(row.querySelector('.srp').value) || 0;
-        const discount = parseFloat(row.querySelector('.discount').value) || 0;
-        const discAmt = (srp * qty) * (discount / 100);
-        const noDisc = srp * qty;
-        const total = noDisc - discAmt;
-        row.querySelector('.discountAmt').value = discAmt.toFixed(2);
-        row.querySelector('.nodisc').value = noDisc.toFixed(2);
-        row.querySelector('.total').value = total.toFixed(2);
-        grandTotal += total;
-      });
-      totalField.value = grandTotal.toFixed(2);
-    }
-
-    orderBody.addEventListener('input', e => {
-      if (['qty', 'srp', 'discount'].includes(e.target.className)) updateTotals();
-    });
-
-    orderBody.addEventListener('click', e => {
-      if (e.target.classList.contains('deleteRow')) {
-        e.target.closest('tr').remove();
-        updateTotals();
-      }
-    });
-
-    addRowBtn.addEventListener('click', addRow);
-
-    // NAVIGATION
-    navItems.forEach(item => {
-      item.addEventListener('click', () => {
-        navItems.forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-        settingsDiv.style.display = item.textContent.trim() === 'Settings' ? 'block' : 'none';
-      });
-    });
-
-    // LOAD THEME
-    const savedTheme = localStorage.getItem('theme') || 'default';
-    themeSelect.value = savedTheme;
-    applyTheme(savedTheme);
-
-    themeSelect.addEventListener('change', () => {
-      const theme = themeSelect.value;
-      localStorage.setItem('theme', theme);
-      applyTheme(theme);
-    });
-
-    function applyTheme(theme) {
-      switch(theme) {
-        case 'black':
-          document.documentElement.style.setProperty('--main-color', '#000000');
-          document.documentElement.style.setProperty('--sidebar-color', '#333');
-          document.documentElement.style.setProperty('--btn-color', '#555');
-          break;
-        case 'red':
-          document.documentElement.style.setProperty('--main-color', '#dc3545');
-          document.documentElement.style.setProperty('--sidebar-color', '#a71d2a');
-          document.documentElement.style.setProperty('--btn-color', '#c82333');
-          break;
-        case 'yellow':
-          document.documentElement.style.setProperty('--main-color', '#ffc107');
-          document.documentElement.style.setProperty('--sidebar-color', '#e0a800');
-          document.documentElement.style.setProperty('--btn-color', '#ffca2c');
-          break;
-        default: // blue
-          document.documentElement.style.setProperty('--main-color', '#0d6efd');
-          document.documentElement.style.setProperty('--sidebar-color', '#0d6efd');
-          document.documentElement.style.setProperty('--btn-color', '#0d6efd');
-      }
-
-      document.querySelector('.sidebar').style.background = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-color');
-      document.querySelectorAll('.btn').forEach(b => b.style.background = getComputedStyle(document.documentElement).getPropertyValue('--btn-color'));
-      document.querySelector('h1').style.color = getComputedStyle(document.documentElement).getPropertyValue('--main-color');
-      document.querySelectorAll('th').forEach(th => th.style.background = getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
-      document.querySelectorAll('.record h4').forEach(h => h.style.color = getComputedStyle(document.documentElement).getPropertyValue('--main-color'));
-    }
-
-    // LOAD RECORDS (DETAILED + PDF EXPORT)
-    function loadRecords() {
-      const records = JSON.parse(localStorage.getItem('bookings')) || [];
-      summary.innerHTML = '';
-      if (records.length === 0) {
-        summary.innerHTML = `<p style="text-align:center; color:#666;">No saved bookings yet.</p>`;
-        return;
-      }
-      records.forEach((rec, index) => {
-        const div = document.createElement('div');
-        div.classList.add('record');
-        div.innerHTML = `
-          <h4>${rec.name}</h4>
-          <p><strong>📞 Contact:</strong> ${rec.contact}</p>
-          <p><strong>🚚 Delivery:</strong> ${rec.delivery}</p>
-          <p><strong>📍 Address:</strong> ${rec.address || 'N/A'}</p>
-          <p><strong>📅 Schedule:</strong> ${rec.date || 'N/A'} ${rec.time || ''}</p>
-          <p><strong>💳 Payment:</strong> ${rec.payment}</p>
-          <p><strong>🏢 Distributor:</strong> ${rec.distributor || 'N/A'}</p>
-          <p><strong>🗒 Remarks:</strong> ${rec.remarks || 'None'}</p>
-          <div class="table-responsive">
-            <table style="width:100%; border-collapse:collapse; margin-top:8px;">
-              <thead>
-                <tr style="background:var(--main-color,#0d6efd); color:white;">
-                  <th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Disc %</th><th>Total</th><th>Remarks</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rec.items.map(item => `
-                  <tr>
-                    <td>${item.generic || '-'}</td>
-                    <td>${item.brand || '-'}</td>
-                    <td>${item.qty}</td>
-                    <td>${item.srp}</td>
-                    <td>${item.discount}</td>
-                    <td>₱${item.total}</td>
-                    <td>${item.remarks || ''}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-          <p style="text-align:right; font-weight:700; margin-top:8px;">Total Amount: ₱${rec.total}</p>
-          <button class="btn" onclick="exportRecordPDF(${index})">📄 Export PDF</button>
-          <button class="delete-btn" onclick="deleteRecord(${index})">🗑 Delete</button>
-        `;
-        summary.appendChild(div);
-      });
-    }
-
-    function deleteRecord(index) {
-      const records = JSON.parse(localStorage.getItem('bookings')) || [];
-      records.splice(index, 1);
-      localStorage.setItem('bookings', JSON.stringify(records));
-      loadRecords();
-    }
-
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const items = [];
-      document.querySelectorAll('#orderBody tr').forEach(row => {
-        items.push({
-          generic: row.querySelector('.generic').value,
-          brand: row.querySelector('.brand').value,
-          qty: row.querySelector('.qty').value,
-          srp: row.querySelector('.srp').value,
-          discount: row.querySelector('.discount').value,
-          total: row.querySelector('.total').value,
-          remarks: row.querySelector('.remarksItem').value
-        });
-      });
-
-      let paymentType = paymentSelect.value;
-      if (paymentType === 'Terms') paymentType += ` (${termsDaysInput.value} days)`;
-      if (paymentType === 'Bank') paymentType += ` - ${bankNameInput.value}`;
-
-      const record = {
-        name: name.value,
-        contact: contact.value,
-        delivery: delivery.value,
-        address: address.value,
-        date: date.value,
-        time: time.value,
-        payment: paymentType,
-        distributor: distributor.value,
-        remarks: remarks.value,
-        total: totalField.value,
-        items,
-        details: JSON.stringify(items, null, 2)
-      };
-
-      const records = JSON.parse(localStorage.getItem('bookings')) || [];
-      records.push(record);
-      localStorage.setItem('bookings', JSON.stringify(records));
-      loadRecords();
-      form.reset();
-      orderBody.innerHTML = '';
-      totalField.value = '';
-      termsDaysContainer.style.display = 'none';
-      bankContainer.style.display = 'none';
-    });
-
-    function exportRecordPDF(index) {
-      const records = JSON.parse(localStorage.getItem('bookings')) || [];
-      const rec = records[index];
-      
-      const div = document.createElement('div');
-      div.innerHTML = `
-        <h1>Booking Summary</h1>
-        <p><strong>Name:</strong> ${rec.name}</p>
-        <p><strong>Contact:</strong> ${rec.contact}</p>
-        <p><strong>Delivery:</strong> ${rec.delivery}</p>
-        <p><strong>Address:</strong> ${rec.address || 'N/A'}</p>
-        <p><strong>Date & Time:</strong> ${rec.date || 'N/A'} ${rec.time || ''}</p>
-        <p><strong>Payment:</strong> ${rec.payment}</p>
-        <p><strong>Distributor:</strong> ${rec.distributor || 'N/A'}</p>
-        <p><strong>Remarks:</strong> ${rec.remarks || 'None'}</p>
-        <table style="width:100%; border-collapse:collapse; margin-top:10px;">
-          <thead>
-            <tr style="background:#0d6efd; color:white;">
-              <th>Generic</th><th>Brand</th><th>Qty</th><th>SRP</th><th>Discount %</th><th>Total</th><th>Remarks</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rec.items.map(item => `
-              <tr>
-                <td>${item.generic}</td>
-                <td>${item.brand}</td>
-                <td>${item.qty}</td>
-                <td>${item.srp}</td>
-                <td>${item.discount}</td>
-                <td>₱${item.total}</td>
-                <td>${item.remarks}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <p style="text-align:right; font-weight:bold; margin-top:10px;">Total Amount: ₱${rec.total}</p>
-      `;
-
-      html2pdf().set({
-        margin: 0.5,
-        filename: `Booking_${rec.name}_${rec.date}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-      }).from(div).save();
-    }
-
-    loadRecords();
-  </script>
+loadRecords();
+</script>
 </body>
 </html>
