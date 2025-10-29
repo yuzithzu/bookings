@@ -391,8 +391,8 @@ body:tableData,
 startY:y
 });
 y=doc.lastAutoTable.finalY+10;
-doc.text(`Total Amount: ₱${rec.total}`,70,y);
-doc.save(`Booking_${rec.name}_${rec.date}.pdf`);
+doc.text(`Total Amount: ₱{rec.total}`,70,y);
+doc.save(`Booking_${rec.name}_{rec.date}.pdf`);
 }
 
 loadRecords();
