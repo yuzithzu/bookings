@@ -4,10 +4,17 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>📦 Booking App</title>
+
+<!-- SheetJS for Excel Export -->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<!-- html2canvas for JPEG Export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <style>
 /* --- GENERAL STYLES --- */
 * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-body { margin: 0; display: flex; height: 100vh; background: #f4f6f9; }
+body { margin: 0; display: flex; min-height: 100vh; background: #f4f6f9; }
 
 /* --- SIDEBAR --- */
 .sidebar {
@@ -34,28 +41,42 @@ input, textarea, select {
 }
 input:focus, textarea:focus, select:focus { border-color: var(--main-color, #0d6efd); outline: none; }
 
+textarea { resize: vertical; }
+
+/* --- BUTTONS --- */
 .btn {
-  width: 100%; background: var(--btn-color, #0d6efd); color: white; border: none;
+  background: var(--btn-color, #0d6efd); color: white; border: none;
   border-radius: 8px; padding: 10px; font-size: 16px; cursor: pointer;
   margin-top: 15px; transition: 0.2s;
 }
 .btn:hover { opacity: 0.9; }
 
+.btn-delete {
+  background: #dc3545; color: white; border: none; padding: 8px 14px;
+  border-radius: 8px; cursor: pointer; transition: 0.2s;
+}
+.btn-delete:hover { background: #b02a37; }
+
 .table-responsive { overflow-x: auto; width: 100%; margin-top: 10px; }
-table { width: 100%; min-width: 900px; border-collapse: collapse; }
-th, td { border: 1px solid #ddd; padding: 6px; font-size: 13px; text-align: center; }
+table { width: 100%; min-width: 900px; border-collapse: collapse; table-layout: fixed; }
+th, td {
+  border: 1px solid #ddd; padding: 6px; font-size: 13px; text-align: center;
+  vertical-align: top; white-space: normal; word-wrap: break-word; overflow-wrap: break-word;
+}
 th { background: var(--main-color, #0d6efd); color: white; }
 
+/* Limit width of Remarks columns so they wrap vertically */
+td:nth-child(9), th:nth-child(9),
+td:nth-child(10), th:nth-child(10) { max-width: 200px; }
+
+/* --- RECORDS LIST --- */
 .summary-container {
   background: #fff; padding: 15px; border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-top: 20px;
-  max-height: 400px; overflow-y: auto;
 }
 .record { border: 1px solid #ddd; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; background: #fafbff; }
 .record h4 { margin: 0 0 5px; color: var(--main-color, #0d6efd); }
 .record table th, .record table td { border: 1px solid #ddd; font-size: 12px; padding: 4px; }
-.delete-btn { background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; }
-.delete-btn:hover { background: #b02a37; }
 
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
@@ -65,18 +86,7 @@ th { background: var(--main-color, #0d6efd); color: white; }
   .nav-item { padding: 10px; font-size: 14px; }
   table, .record table { font-size: 11px; min-width: 700px; }
 }
-
-/* --- PRINT --- */
-@media print {
-  body { background: white; }
-  .sidebar, .btn, .delete-btn, .settings { display: none; }
-  .main { padding: 0; }
-  .summary-container { max-height: none; overflow: visible; }
-}
 </style>
-
-<!-- SheetJS for Excel Export -->
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -322,13 +332,16 @@ form.addEventListener('submit', e => {
   if (paymentType === 'Terms') paymentType += ` (${termsDaysInput.value} days)`;
   if (paymentType === 'Bank') paymentType += ` - ${bankNameInput.value}`;
 
+  const now = new Date().toLocaleString();
+
   const record = {
     name: nameInput.value, contact: contactInput.value,
     delivery: deliveryInput.value, address: addressInput.value,
     date: dateInput.value, time: timeInput.value,
     payment: paymentType, distributor: distributorInput.value,
     remarks: remarksInput.value, total: totalField.value,
-    items, details: JSON.stringify(items, null, 2)
+    items, details: JSON.stringify(items, null, 2),
+    createdAt: now // <-- timestamp added
   };
 
   const records = JSON.parse(localStorage.getItem('bookings')) || [];
@@ -356,10 +369,12 @@ function loadRecords() {
       💳 ${rec.payment}<br>
       🏢 ${rec.distributor}<br>
       📍 ${rec.address || 'N/A'}<br>
+      🕒 Created: ${rec.createdAt || 'N/A'}<br>
       <p>Remarks: ${rec.remarks || 'None'}</p>
       <button class="delete-btn" onclick="deleteRecord(${index})">Delete</button>
       <button class="btn" style="margin-top:5px;" onclick="downloadExcel(${index})">📄 Export Excel</button>
-      <details style="margin-top:5px;"><summary>View Details</summary>
+      <button class="btn" style="margin-top:5px;" onclick="downloadJPEG(${index})">🖼 Export JPEG</button>
+      <details style="margin-top:8px;"><summary>View Details</summary>
       <table>
         <thead><tr>
           <th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th>
@@ -389,7 +404,7 @@ function loadRecords() {
 // --- DELETE RECORD ---
 function deleteRecord(index) {
   const records = JSON.parse(localStorage.getItem('bookings')) || [];
-  records.splice(index,1);
+  records.splice(index, 1);
   localStorage.setItem('bookings', JSON.stringify(records));
   loadRecords();
 }
@@ -409,6 +424,7 @@ function downloadExcel(index) {
     ['Payment', rec.payment],
     ['Distributor', rec.distributor],
     ['Remarks', rec.remarks || 'None'],
+    ['Created At', rec.createdAt || 'N/A'],
     [],
     ['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']
   ];
@@ -428,22 +444,8 @@ function downloadExcel(index) {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-  // --- Apply bold to header row and total row ---
-  const range = XLSX.utils.decode_range(ws['!ref']);
-  for (let C = 0; C <= range.e.c; ++C) {
-    // Bold header
-    const headerCell = ws[XLSX.utils.encode_cell({r:9, c:C})];
-    if (headerCell) headerCell.s = {font:{bold:true}};
-
-    // Bold total amount
-    const totalCell = ws[XLSX.utils.encode_cell({r:lastRowIndex, c:8})];
-    if (totalCell) totalCell.s = {font:{bold:true}};
-    const totalValueCell = ws[XLSX.utils.encode_cell({r:lastRowIndex, c:9})];
-    if (totalValueCell) totalValueCell.s = {font:{bold:true}};
-  }
-
   // --- Auto-width columns ---
-  const colWidths = wsData[9].map((_, i) => {
+  const colWidths = wsData[10].map((_, i) => {
     return { wch: Math.max(...wsData.map(r => (r[i] ? r[i].toString().length : 0))) + 2 };
   });
   ws['!cols'] = colWidths;
@@ -451,7 +453,86 @@ function downloadExcel(index) {
   XLSX.utils.book_append_sheet(wb, ws, 'Booking');
 
   // --- Export Excel ---
-  XLSX.writeFile(wb, `Booking_${rec.name}_${rec.date}.xlsx`);
+  // sanitize filename
+  const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
+  XLSX.writeFile(wb, `Booking_${safeName}_${rec.date || ''}.xlsx`);
+}
+
+// --- EXPORT JPEG ---
+function downloadJPEG(index) {
+  const records = JSON.parse(localStorage.getItem('bookings')) || [];
+  const rec = records[index];
+
+  const tempDiv = document.createElement('div');
+  tempDiv.style.padding = '20px';
+  tempDiv.style.background = '#fff';
+  tempDiv.style.width = '1000px';
+  tempDiv.style.fontFamily = 'Poppins, sans-serif';
+  tempDiv.style.fontSize = '13px';
+  tempDiv.innerHTML = `
+    <h2 style="color:#0d6efd; text-align:center;">📦 Booking Summary</h2>
+    <p><b>Booking for:</b> ${rec.name}</p>
+    <p><b>Contact:</b> ${rec.contact}</p>
+    <p><b>Delivery:</b> ${rec.delivery}</p>
+    <p><b>Address:</b> ${rec.address || 'N/A'}</p>
+    <p><b>Date & Time:</b> ${rec.date} ${rec.time}</p>
+    <p><b>Payment:</b> ${rec.payment}</p>
+    <p><b>Distributor:</b> ${rec.distributor}</p>
+    <p><b>Remarks / Special Instructions:</b> ${rec.remarks || 'None'}</p>
+    <p><b>Created At:</b> ${rec.createdAt || 'N/A'}</p>
+    <br>
+    <table border="1" cellspacing="0" cellpadding="5" style="width:100%; border-collapse:collapse; text-align:center; table-layout:fixed;">
+      <thead style="background:#0d6efd; color:#fff;">
+        <tr>
+          <th>Generic</th>
+          <th>Brand</th>
+          <th>Qty</th>
+          <th>Unit</th>
+          <th>SRP</th>
+          <th>Discount Type</th>
+          <th>Discount Value</th>
+          <th>Discount Amt</th>
+          <th>Total</th>
+          <th style="max-width:200px; word-wrap:break-word;">Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rec.items.map(item => `
+          <tr>
+            <td>${item.generic}</td>
+            <td>${item.brand}</td>
+            <td>${item.qty}</td>
+            <td>${item.unit}</td>
+            <td>${item.srp}</td>
+            <td>${item.discountType}</td>
+            <td>${item.discount}</td>
+            <td>${item.discountAmt}</td>
+            <td>${item.total}</td>
+            <td style="white-space:normal; word-wrap:break-word; max-width:200px;">${item.remarks}</td>
+          </tr>
+        `).join('')}
+        <tr>
+          <td colspan="8" style="text-align:right; font-weight:bold;">Total Amount</td>
+          <td colspan="2" style="font-weight:bold;">₱${rec.total}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  document.body.appendChild(tempDiv);
+
+  html2canvas(tempDiv, {
+    scale: 3,
+    backgroundColor: '#ffffff',
+    useCORS: true
+  }).then(canvas => {
+    const link = document.createElement('a');
+    const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
+    link.download = `Booking_${safeName}_${rec.date || ''}.jpeg`;
+    link.href = canvas.toDataURL('image/jpeg', 1.0);
+    link.click();
+    document.body.removeChild(tempDiv);
+  });
 }
 
 // --- INITIAL LOAD ---
