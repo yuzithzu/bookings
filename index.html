@@ -19,7 +19,7 @@
        - Notes: styles keep layout consistent on desktop and mobile
        ========================================================================= */
 
-    :root {
+    :root{
       --main: #0d6efd;
       --accent: #0d6efd;
       --danger: #dc3545;
@@ -31,9 +31,14 @@
       --shadow: rgba(15,15,15,0.06);
     }
 
-    * { box-sizing: border-box; font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-    html, body { height: 100%; }
-    body {
+    *{
+      box-sizing: border-box;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html, body{ height: 100%; }
+
+    body{
       margin: 0;
       background: var(--bg);
       color: var(--text);
@@ -44,126 +49,159 @@
     }
 
     /* ---------- Sidebar ---------- */
-    .sidebar {
+    .sidebar{
       width: 230px;
       background: var(--main);
       color: #fff;
       padding: 22px 16px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      gap:10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     }
-    .sidebar h2 { margin: 0 0 18px; font-size:18px; }
-    .nav-item { width:100%; text-align:center; padding:10px 6px; cursor:pointer; border-radius:8px; margin-bottom:6px; }
-    .nav-item.active, .nav-item:hover { background: rgba(255,255,255,0.12); }
+
+    .sidebar h2{ margin: 0 0 18px; font-size: 18px; }
+    .nav-item{
+      width: 100%;
+      text-align: center;
+      padding: 10px 6px;
+      cursor: pointer;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+    .nav-item.active, .nav-item:hover{ background: rgba(255,255,255,0.12); }
 
     /* ---------- Main Container ---------- */
-    .main { flex:1; padding:18px; overflow:auto; }
-    .container { max-width:1100px; margin: 0 auto; }
-    h1 { color:var(--main); text-align:center; margin-bottom:12px; font-size:20px; }
+    .main{ flex: 1; padding: 18px; overflow: auto; }
+    .container{ max-width: 1100px; margin: 0 auto; }
+    h1{ color: var(--main); text-align: center; margin-bottom: 12px; font-size: 20px; }
 
     /* ---------- Card / Form ---------- */
-    form.card {
-      background:var(--card);
-      border-radius:12px;
-      padding:18px;
-      box-shadow:0 6px 18px var(--shadow);
-      margin-bottom:18px;
+    form.card{
+      background: var(--card);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 6px 18px var(--shadow);
+      margin-bottom: 18px;
     }
-    label { display:block; font-weight:600; margin-top:10px; font-size:13px; }
-    input[type="text"], input[type="tel"], input[type="number"], input[type="date"], input[type="time"],
-    select, textarea {
-      width:100%;
-      padding:8px 10px;
-      margin-top:6px;
-      border-radius:8px;
-      border:1px solid #d0d7de;
-      font-size:14px;
-      color:var(--text);
+
+    label{ display: block; font-weight: 600; margin-top: 10px; font-size: 13px; }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    select,
+    textarea{
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 6px;
+      border-radius: 8px;
+      border: 1px solid #d0d7de;
+      font-size: 14px;
+      color: var(--text);
       background: #fff;
     }
-    textarea { resize: vertical; min-height:60px; }
 
-    .flex-row { display:flex; gap:10px; align-items:center; }
-    .flex-row > * { flex:1; }
+    textarea{ resize: vertical; min-height: 60px; }
 
-    .btn {
-      display:inline-block;
-      background:var(--accent);
-      color:#fff;
-      padding:9px 12px;
-      border-radius:8px;
-      border:none;
-      cursor:pointer;
-      font-weight:600;
-      margin-top:12px;
-      font-size:14px;
+    .flex-row{ display:flex; gap:10px; align-items:center; }
+    .flex-row > *{ flex: 1; }
+
+    .btn{
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 12px;
+      font-size: 14px;
     }
-    .btn.secondary { background:#6c757d; }
-    .btn.danger { background:var(--danger); }
-    .btn.small { padding:6px 8px; font-size:13px; }
+    .btn.secondary{ background: #6c757d; }
+    .btn.danger{ background: var(--danger); }
+    .btn.small{ padding: 6px 8px; font-size: 13px; }
 
     /* ---------- Table (items) ---------- */
-    .table-responsive { overflow-x:auto; margin-top:10px; }
-    table { width:100%; border-collapse:collapse; min-width:900px; table-layout:fixed; }
-    th, td { border:1px solid var(--border); padding:8px; font-size:13px; vertical-align:top; text-align:center; }
-    th { background:var(--main); color:#fff; font-weight:700; }
-    td input, td select { width:100%; padding:6px; box-sizing:border-box; border-radius:6px; border:1px solid #e6e9ee; }
+    .table-responsive{ overflow-x: auto; margin-top: 10px; }
+    table{ width: 100%; border-collapse: collapse; min-width: 900px; table-layout: fixed; }
+    th, td{ border: 1px solid var(--border); padding: 8px; font-size: 13px; vertical-align: top; text-align: center; }
+    th{ background: var(--main); color: #fff; font-weight: 700; }
+    td input, td select{ width: 100%; padding: 6px; box-sizing: border-box; border-radius: 6px; border: 1px solid #e6e9ee; }
 
     /* wrap remarks column */
-    td.remarksCol, th.remarksCol { max-width:220px; word-wrap:break-word; white-space:normal; overflow-wrap:break-word; text-align:left; }
+    td.remarksCol, th.remarksCol{
+      max-width: 220px;
+      word-wrap: break-word;
+      white-space: normal;
+      overflow-wrap: break-word;
+      text-align: left;
+    }
 
-    .small { padding:6px 8px; font-size:13px; }
+    .small{ padding: 6px 8px; font-size: 13px; }
 
     /* record list */
-    .summary { background:var(--card); padding:14px; border-radius:10px; box-shadow:0 6px 18px rgba(15,15,15,0.04); }
-    .record { border:1px solid var(--border); padding:10px; border-radius:8px; margin-bottom:10px; background:#fafbff; }
-    .record h4 { margin:0 0 6px; color:var(--main); font-size:16px; }
-    .record p { margin:4px 0; color:#333; font-size:14px; }
+    .summary{
+      background: var(--card);
+      padding: 14px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(15,15,15,0.04);
+    }
+    .record{
+      border: 1px solid var(--border);
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      background: #fafbff;
+    }
+    .record h4{ margin: 0 0 6px; color: var(--main); font-size: 16px; }
+    .record p{ margin: 4px 0; color: #333; font-size: 14px; }
 
     /* responsive adjustments */
-    @media (max-width:900px) {
-      .sidebar { display:none; }
-      table { min-width:720px; }
-      .container { padding: 12px; }
+    @media (max-width: 900px){
+      .sidebar{ display: none; }
+      table{ min-width: 720px; }
+      .container{ padding: 12px; }
     }
 
     /* ---------- Export (hidden but styled) ---------- */
     /* Export wrapper will be appended temporarily to body for html2canvas capture */
-    .export-wrapper {
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#fff;
-      color:#222;
+    .export-wrapper{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #222;
       /* The offscreen positioning will be applied dynamically but styling kept here */
     }
 
-    .export-card {
+    .export-card{
       /* This width defines the content width of the exported JPEG.
          Adjust this value if you want a wider or narrower exported image. */
       width: 900px;
       max-width: 920px;
       font-family: "Poppins", sans-serif;
-      color:#222;
+      color: #222;
       background: #fff;
       padding: 20px;
       border-radius: 6px;
     }
 
-    .export-card h2 { margin: 0 0 10px; text-align:center; color:var(--main); font-size:18px; }
-    .export-card p { margin:6px 0; font-size:13px; }
+    .export-card h2{ margin: 0 0 10px; text-align: center; color: var(--main); font-size: 18px; }
+    .export-card p{ margin: 6px 0; font-size: 13px; }
 
-    .export-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:10px; }
-    .export-table th, .export-table td { border:1px solid #e6e9ee; padding:6px; text-align:center; }
-    .export-table thead th { background:var(--main); color:#fff; font-weight:700; }
+    .export-table{ width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+    .export-table th, .export-table td{ border: 1px solid #e6e9ee; padding: 6px; text-align: center; }
+    .export-table thead th{ background: var(--main); color: #fff; font-weight: 700; }
 
     /* small print for export */
-    .export-footer { margin-top:12px; font-size:12px; color:var(--muted); text-align:center; }
+    .export-footer{ margin-top: 12px; font-size: 12px; color: var(--muted); text-align: center; }
 
     /* Accessibility helpers */
-    [role="button"] { cursor:pointer; }
+    [role="button"]{ cursor: pointer; }
   </style>
 </head>
 <body>
@@ -286,500 +324,560 @@
 
   <!-- Scripts -->
   <script>
-  /* =========================================================================
-     Booking App Script
-     - Full features:
-       * Add / remove item rows
-       * Auto-calculation for discounts and totals
-       * Save/load bookings to localStorage
-       * Export to Excel (SheetJS)
-       * Export to JPEG (html2canvas) — centered with white margins
-     ========================================================================= */
+    /* =========================================================================
+       Booking App Script
+       - Full features:
+         * Add / remove item rows
+         * Auto-calculation for discounts and totals
+         * Save/load bookings to localStorage
+         * Export to Excel (SheetJS)
+         * Export to JPEG (html2canvas) — centered with white margins
+       ========================================================================= */
 
-  /* -------------------- Elements -------------------- */
-  const nameInput = document.getElementById('name');
-  const contactInput = document.getElementById('contact');
-  const deliveryInput = document.getElementById('delivery');
-  const addressInput = document.getElementById('address');
-  const dateInput = document.getElementById('date');
-  const timeInput = document.getElementById('time');
-  const paymentSelect = document.getElementById('payment');
-  const termsDaysContainer = document.getElementById('termsDaysContainer');
-  const termsDaysInput = document.getElementById('termsDays');
-  const bankContainer = document.getElementById('bankContainer');
-  const bankNameInput = document.getElementById('bankName');
-  const distributorInput = document.getElementById('distributor');
-  const remarksInput = document.getElementById('remarks');
-  const totalField = document.getElementById('total');
-  const processedByInput = document.getElementById('processedBy');
+    /* -------------------- Elements -------------------- */
+    const nameInput = document.getElementById('name');
+    const contactInput = document.getElementById('contact');
+    const deliveryInput = document.getElementById('delivery');
+    const addressInput = document.getElementById('address');
+    const dateInput = document.getElementById('date');
+    const timeInput = document.getElementById('time');
+    const paymentSelect = document.getElementById('payment');
+    const termsDaysContainer = document.getElementById('termsDaysContainer');
+    const termsDaysInput = document.getElementById('termsDays');
+    const bankContainer = document.getElementById('bankContainer');
+    const bankNameInput = document.getElementById('bankName');
+    const distributorInput = document.getElementById('distributor');
+    const remarksInput = document.getElementById('remarks');
+    const totalField = document.getElementById('total');
+    const processedByInput = document.getElementById('processedBy');
 
-  const addRowBtn = document.getElementById('addRow');
-  const clearItemsBtn = document.getElementById('clearItems');
-  const orderBody = document.getElementById('orderBody');
+    const addRowBtn = document.getElementById('addRow');
+    const clearItemsBtn = document.getElementById('clearItems');
+    const orderBody = document.getElementById('orderBody');
 
-  const saveBookingBtn = document.getElementById('saveBooking');
-  const recordList = document.getElementById('recordList');
+    const saveBookingBtn = document.getElementById('saveBooking');
+    const recordList = document.getElementById('recordList');
 
-  /* -------------------- Payment toggle -------------------- */
-  paymentSelect.addEventListener('change', () => {
-    const val = paymentSelect.value;
-    termsDaysContainer.style.display = (val === 'Terms') ? 'block' : 'none';
-    bankContainer.style.display = (val === 'Bank') ? 'block' : 'none';
-  });
-
-  /* -------------------- Add one default row on load -------------------- */
-  // We'll create a function for adding rows below and call once now.
-  addRow();
-
-  /* -------------------- Functions: addRow, updateTotals -------------------- */
-  function addRow() {
-    const tr = document.createElement('tr');
-
-    tr.innerHTML = `
-      <td><input type="text" class="generic" placeholder="Generic name" aria-label="Generic name"></td>
-      <td><input type="text" class="brand" placeholder="Brand" aria-label="Brand"></td>
-      <td><input type="number" class="qty" min="0" step="0.01" value="1" style="width:100%;" aria-label="Quantity"></td>
-      <td>
-        <select class="unit" aria-label="Unit">
-          <option value="pcs">Pcs</option>
-          <option value="box">Box</option>
-          <option value="pfs">Pfs</option>
-          <option value="vial">Vial</option>
-        </select>
-      </td>
-      <td><input type="number" class="srp" min="0" step="0.01" value="0" aria-label="SRP"></td>
-      <td>
-        <select class="discountType" aria-label="Discount type">
-          <option value="percent">%</option>
-          <option value="amount">Fixed Amount</option>
-          <option value="nodisc">No Discount</option>
-        </select>
-      </td>
-      <td><input type="number" class="discount" min="0" step="0.01" value="0" aria-label="Discount value"></td>
-      <td><input type="number" class="discountAmt" readonly aria-label="Discount amount"></td>
-      <td><input type="number" class="nodisc" readonly aria-label="No discount total"></td>
-      <td class="remarksCol"><input type="text" class="remarksItem" placeholder="Remarks" aria-label="Remarks"></td>
-      <td><input type="number" class="total" readonly aria-label="Row total"></td>
-      <td><button type="button" class="btn small btn-danger deleteRow" style="background:#dc3545; color:#fff; border-radius:6px; padding:6px 8px;">❌</button></td>
-    `;
-
-    // Append and set up listeners
-    orderBody.appendChild(tr);
-
-    // Attach listeners to inputs in the row to update totals live
-    tr.querySelectorAll('input, select').forEach(el => {
-      el.addEventListener('input', updateTotals);
-      el.addEventListener('change', updateTotals);
+    /* -------------------- Payment toggle -------------------- */
+    paymentSelect.addEventListener('change', () => {
+      const val = paymentSelect.value;
+      termsDaysContainer.style.display = (val === 'Terms') ? 'block' : 'none';
+      bankContainer.style.display = (val === 'Bank') ? 'block' : 'none';
     });
 
-    // Delete row handler
-    const delBtn = tr.querySelector('.deleteRow');
-    delBtn.addEventListener('click', () => {
-      tr.remove();
+    /* -------------------- Add one default row on load -------------------- */
+    // We'll create a function for adding rows below and call once now.
+    addRow();
+
+    /* -------------------- Functions: addRow, updateTotals -------------------- */
+    function addRow() {
+      const tr = document.createElement('tr');
+
+      tr.innerHTML = `
+        <td><input type="text" class="generic" placeholder="Generic name" aria-label="Generic name"></td>
+        <td><input type="text" class="brand" placeholder="Brand" aria-label="Brand"></td>
+        <td><input type="number" class="qty" min="0" step="0.01" value="1" style="width:100%;" aria-label="Quantity"></td>
+        <td>
+          <select class="unit" aria-label="Unit">
+            <option value="pcs">Pcs</option>
+            <option value="box">Box</option>
+            <option value="pfs">Pfs</option>
+            <option value="vial">Vial</option>
+          </select>
+        </td>
+        <td><input type="number" class="srp" min="0" step="0.01" value="0" aria-label="SRP"></td>
+        <td>
+          <select class="discountType" aria-label="Discount type">
+            <option value="percent">%</option>
+            <option value="amount">Fixed Amount</option>
+            <option value="nodisc">No Discount</option>
+          </select>
+        </td>
+        <td><input type="number" class="discount" min="0" step="0.01" value="0" aria-label="Discount value"></td>
+        <td><input type="number" class="discountAmt" readonly aria-label="Discount amount"></td>
+        <td><input type="number" class="nodisc" readonly aria-label="No discount total"></td>
+        <td class="remarksCol"><input type="text" class="remarksItem" placeholder="Remarks" aria-label="Remarks"></td>
+        <td><input type="number" class="total" readonly aria-label="Row total"></td>
+        <td><button type="button" class="btn small btn-danger deleteRow" style="background:#dc3545; color:#fff; border-radius:6px; padding:6px 8px;">❌</button></td>
+      `;
+
+      // Append and set up listeners
+      orderBody.appendChild(tr);
+
+      // Attach listeners to inputs in the row to update totals live
+      tr.querySelectorAll('input, select').forEach(el => {
+        el.addEventListener('input', updateTotals);
+        el.addEventListener('change', updateTotals);
+      });
+
+      // Delete row handler
+      const delBtn = tr.querySelector('.deleteRow');
+      delBtn.addEventListener('click', () => {
+        tr.remove();
+        updateTotals();
+      });
+
+      // Ensure totals update with this new row
+      updateTotals();
+    }
+
+    clearItemsBtn.addEventListener('click', () => {
+      if (!confirm('Clear all items?')) return;
+      orderBody.innerHTML = '';
+      addRow();
       updateTotals();
     });
 
-    // Ensure totals update with this new row
-    updateTotals();
-  }
+    function updateTotals() {
+      // We must be careful and compute digit-by-digit to avoid floating point issues in presentation
+      // But here we will compute using Number and toFixed for display — this keeps clarity for user input
+      let grand = 0;
+      const rows = orderBody.querySelectorAll('tr');
 
-  clearItemsBtn.addEventListener('click', () => {
-    if (!confirm('Clear all items?')) return;
-    orderBody.innerHTML = '';
-    addRow();
-    updateTotals();
-  });
+      rows.forEach(row => {
+        const qty = parseFloat(row.querySelector('.qty').value) || 0;
+        const srp = parseFloat(row.querySelector('.srp').value) || 0;
+        const discType = row.querySelector('.discountType').value;
+        const discVal = parseFloat(row.querySelector('.discount').value) || 0;
 
-  function updateTotals() {
-    // We must be careful and compute digit-by-digit to avoid floating point issues in presentation
-    // But here we will compute using Number and toFixed for display — this keeps clarity for user input
-    let grand = 0;
-    const rows = orderBody.querySelectorAll('tr');
+        // noDiscount total
+        const noDisc = qty * srp;
 
-    rows.forEach(row => {
-      const qty = parseFloat(row.querySelector('.qty').value) || 0;
-      const srp = parseFloat(row.querySelector('.srp').value) || 0;
-      const discType = row.querySelector('.discountType').value;
-      const discVal = parseFloat(row.querySelector('.discount').value) || 0;
+        // compute discount amount
+        let discAmt = 0;
+        if (discType === 'percent') {
+          discAmt = noDisc * (discVal / 100);
+        } else if (discType === 'amount') {
+          discAmt = discVal;
+        } else {
+          discAmt = 0;
+        }
 
-      // noDiscount total
-      const noDisc = qty * srp;
+        // ensure non-negative
+        let total = noDisc - discAmt;
+        if (!isFinite(total) || total < 0) total = 0;
 
-      // compute discount amount
-      let discAmt = 0;
-      if (discType === 'percent') {
-        discAmt = noDisc * (discVal / 100);
-      } else if (discType === 'amount') {
-        discAmt = discVal;
-      } else {
-        discAmt = 0;
-      }
+        // set display fields with 2 decimal places
+        const discountAmtField = row.querySelector('.discountAmt');
+        const nodiscField = row.querySelector('.nodisc');
+        const totalFieldRow = row.querySelector('.total');
 
-      // ensure non-negative
-      let total = noDisc - discAmt;
-      if (!isFinite(total) || total < 0) total = 0;
+        if (discountAmtField) discountAmtField.value = Number(discAmt).toFixed(2);
+        if (nodiscField) nodiscField.value = Number(noDisc).toFixed(2);
+        if (totalFieldRow) totalFieldRow.value = Number(total).toFixed(2);
 
-      // set display fields with 2 decimal places
-      const discountAmtField = row.querySelector('.discountAmt');
-      const nodiscField = row.querySelector('.nodisc');
-      const totalFieldRow = row.querySelector('.total');
-
-      if (discountAmtField) discountAmtField.value = Number(discAmt).toFixed(2);
-      if (nodiscField) nodiscField.value = Number(noDisc).toFixed(2);
-      if (totalFieldRow) totalFieldRow.value = Number(total).toFixed(2);
-
-      grand += total;
-    });
-
-    // display grand total in the summary field
-    totalField.value = Number(grand).toFixed(2);
-  }
-
-  addRowBtn.addEventListener('click', addRow);
-
-  /* -------------------- Save booking -------------------- */
-  saveBookingBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-
-    // gather items
-    const items = [];
-    orderBody.querySelectorAll('tr').forEach(row => {
-      items.push({
-        generic: row.querySelector('.generic').value || '',
-        brand: row.querySelector('.brand').value || '',
-        qty: row.querySelector('.qty').value || 0,
-        unit: row.querySelector('.unit').value || '',
-        srp: row.querySelector('.srp').value || 0,
-        discountType: row.querySelector('.discountType').value || '',
-        discount: row.querySelector('.discount').value || 0,
-        discountAmt: row.querySelector('.discountAmt').value || 0,
-        total: row.querySelector('.total').value || 0,
-        remarks: row.querySelector('.remarksItem').value || ''
+        grand += total;
       });
-    });
 
-    const paymentType = (paymentSelect.value === 'Terms') ? `Terms (${termsDaysInput.value || '0'} days)` :
-                        (paymentSelect.value === 'Bank') ? `Bank - ${bankNameInput.value || ''}` :
-                        paymentSelect.value;
-
-    // timestamp
-    const createdAt = new Date().toLocaleString();
-
-    const record = {
-      name: nameInput.value || '',
-      contact: contactInput.value || '',
-      delivery: deliveryInput.value || '',
-      address: addressInput.value || '',
-      date: dateInput.value || '',
-      time: timeInput.value || '',
-      payment: paymentType,
-      distributor: distributorInput.value || '',
-      remarks: remarksInput.value || '',
-      total: totalField.value || '0.00',
-      items: items,
-      createdAt: createdAt,
-      processedBy: processedByInput.value || ''
-    };
-
-    // save to localStorage
-    const records = JSON.parse(localStorage.getItem('bookings')) || [];
-    records.push(record);
-    localStorage.setItem('bookings', JSON.stringify(records));
-
-    // reset form but leave UI stable
-    document.getElementById('bookingForm').reset();
-    orderBody.innerHTML = '';
-    addRow(); updateTotals();
-    totalField.value = '';
-
-    // reload list
-    loadRecords();
-
-    // focus name for quick next entry
-    nameInput.focus();
-  });
-
-  /* -------------------- Load records to UI -------------------- */
-  function loadRecords() {
-    const records = JSON.parse(localStorage.getItem('bookings')) || [];
-    recordList.innerHTML = '';
-    if (records.length === 0) {
-      recordList.innerHTML = '<p style="color:var(--muted);">No bookings yet.</p>';
-      return;
+      // display grand total in the summary field
+      totalField.value = Number(grand).toFixed(2);
     }
 
-    records.forEach((rec, idx) => {
-      const div = document.createElement('div');
-      div.className = 'record';
+    addRowBtn.addEventListener('click', addRow);
 
-      // Build inner HTML for record (escape HTML)
-      div.innerHTML = `
-        <h4>${escapeHtml(rec.name)} - ₱${escapeHtml(rec.total)}</h4>
-        <p>📞 ${escapeHtml(rec.contact)}<br>
-           🚚 ${escapeHtml(rec.delivery)}<br>
-           💳 ${escapeHtml(rec.payment)}<br>
-           🏢 ${escapeHtml(rec.distributor)}<br>
-           📍 ${escapeHtml(rec.address || 'N/A')}<br>
-           🕒 Created: ${escapeHtml(rec.createdAt || 'N/A')}</p>
-        <p><b>Remarks:</b> ${escapeHtml(rec.remarks || 'None')}</p>
-        <p><b>👤 Processed by:</b> ${escapeHtml(rec.processedBy || 'N/A')}</p>
+    /* -------------------- Save booking -------------------- */
+    saveBookingBtn.addEventListener('click', (e) => {
+      e.preventDefault();
 
-        <div style="margin-top:8px;">
-          <button class="btn" onclick="downloadExcel(${idx})">📄 Export Excel</button>
-          <button class="btn" onclick="downloadJPEG(${idx})">🖼 Download JPEG</button>
-          <button class="btn danger" style="background:var(--danger)" onclick="deleteRecord(${idx})">🗑 Delete</button>
-        </div>
-
-        <details style="margin-top:10px;">
-          <summary style="cursor:pointer;">View Items (${rec.items.length})</summary>
-          <div style="overflow:auto; margin-top:8px;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Disc Type</th><th>Disc Val</th><th>Disc Amt</th><th>Total</th><th>Remarks</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${rec.items.map(item => `
-                  <tr>
-                    <td>${escapeHtml(item.generic)}</td>
-                    <td>${escapeHtml(item.brand)}</td>
-                    <td>${escapeHtml(item.qty)}</td>
-                    <td>${escapeHtml(item.unit)}</td>
-                    <td>${escapeHtml(item.srp)}</td>
-                    <td>${escapeHtml(item.discountType)}</td>
-                    <td>${escapeHtml(item.discount)}</td>
-                    <td>${escapeHtml(item.discountAmt)}</td>
-                    <td>${escapeHtml(item.total)}</td>
-                    <td>${escapeHtml(item.remarks)}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        </details>
-      `;
-      recordList.appendChild(div);
-    });
-  }
-
-  /* -------------------- Delete record -------------------- */
-  function deleteRecord(index) {
-    const records = JSON.parse(localStorage.getItem('bookings')) || [];
-    if (!records[index]) return;
-    if (!confirm('Delete this booking?')) return;
-    records.splice(index, 1);
-    localStorage.setItem('bookings', JSON.stringify(records));
-    loadRecords();
-  }
-  window.deleteRecord = deleteRecord; // expose to inline onclick
-
-  /* -------------------- Export Excel -------------------- */
-  function downloadExcel(index) {
-    const records = JSON.parse(localStorage.getItem('bookings')) || [];
-    const rec = records[index];
-    if (!rec) return alert('Record not found.');
-
-    // Prepare worksheet data as array of arrays
-    const wsData = [
-      ['Booking for', rec.name],
-      ['Contact', rec.contact],
-      ['Delivery', rec.delivery],
-      ['Address', rec.address || 'N/A'],
-      ['Preferred Date & Time', `${rec.date} ${rec.time}`],
-      ['Payment', rec.payment],
-      ['Distributor', rec.distributor],
-      ['Remarks', rec.remarks || 'None'],
-      ['Processed By', rec.processedBy || 'N/A'],
-      ['Created At', rec.createdAt || 'N/A'],
-      [],
-      ['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']
-    ];
-
-    rec.items.forEach(item => {
-      wsData.push([
-        item.generic, item.brand, item.qty, item.unit, item.srp,
-        item.discountType, item.discount, item.discountAmt, item.total, item.remarks
-      ]);
-    });
-
-    wsData.push(['','','','','','','','','Total Amount', rec.total]);
-
-    // create workbook & worksheet
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-    // auto column width (simple heuristic)
-    const headerRowIndex = 10;
-    const colWidths = wsData[headerRowIndex].map((_, i) => {
-      const max = Math.max(...wsData.map(r => (r[i] ? String(r[i]).length : 0)));
-      return { wch: Math.min(Math.max(max + 2, 10), 40) };
-    });
-    ws['!cols'] = colWidths;
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Booking');
-    const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
-    const filename = `Booking_${safeName}_${(rec.date || '')}.xlsx`;
-    XLSX.writeFile(wb, filename);
-  }
-  window.downloadExcel = downloadExcel;
-
-  /* -------------------- Export JPEG (centered with margin) -------------------- */
-  async function downloadJPEG(index) {
-    const records = JSON.parse(localStorage.getItem('bookings')) || [];
-    const rec = records[index];
-    if (!rec) return alert('Record not found.');
-
-    // Create export wrapper and centered card (this will be rendered by html2canvas)
-    const wrapper = document.createElement('div');
-    wrapper.className = 'export-wrapper';
-
-    // Offscreen but still renderable — keep it accessible to html2canvas
-    wrapper.style.position = 'fixed';
-    wrapper.style.left = '-9999px'; // place offscreen to avoid flicker on UI
-    wrapper.style.top = '0';
-    wrapper.style.zIndex = 99999;
-
-    // Outer margin to ensure white space around content when rendered
-    // This outer padding acts as the "white border" you requested
-    wrapper.style.padding = '48px'; // <-- adjust this value for thicker/thinner border
-    wrapper.style.background = '#ffffff';
-
-    const card = document.createElement('div');
-    card.className = 'export-card';
-
-    // Compose HTML for export card (centered and fixed width)
-    card.innerHTML = `
-      <h2>📦 Booking Summary</h2>
-      <p><b>Booking for:</b> ${escapeHtml(rec.name)}</p>
-      <p><b>Contact:</b> ${escapeHtml(rec.contact)}</p>
-      <p><b>Delivery:</b> ${escapeHtml(rec.delivery)}</p>
-      <p><b>Address:</b> ${escapeHtml(rec.address || 'N/A')}</p>
-      <p><b>Preferred Date & Time:</b> ${escapeHtml(rec.date)} ${escapeHtml(rec.time)}</p>
-      <p><b>Payment:</b> ${escapeHtml(rec.payment)}</p>
-      <p><b>Distributor:</b> ${escapeHtml(rec.distributor)}</p>
-      <p><b>Remarks / Special Instructions:</b> ${escapeHtml(rec.remarks || 'None')}</p>
-      <p><b>Created At:</b> ${escapeHtml(rec.createdAt || 'N/A')}</p>
-      <br>
-      <table class="export-table" role="table" aria-label="items">
-        <thead>
-          <tr>
-            <th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Disc Type</th><th>Disc Val</th><th>Disc Amt</th><th>Total</th><th>Remarks</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rec.items.map(it => `
-            <tr>
-              <td>${escapeHtml(it.generic)}</td>
-              <td>${escapeHtml(it.brand)}</td>
-              <td>${escapeHtml(it.qty)}</td>
-              <td>${escapeHtml(it.unit)}</td>
-              <td>${escapeHtml(it.srp)}</td>
-              <td>${escapeHtml(it.discountType)}</td>
-              <td>${escapeHtml(it.discount)}</td>
-              <td>${escapeHtml(it.discountAmt)}</td>
-              <td>${escapeHtml(it.total)}</td>
-              <td style="white-space:normal; word-wrap:break-word; max-width:200px; text-align:left;">${escapeHtml(it.remarks)}</td>
-            </tr>
-          `).join('')}
-          <tr>
-            <td colspan="8" style="text-align:right; font-weight:bold;">Total Amount</td>
-            <td colspan="2" style="font-weight:bold;">₱${escapeHtml(rec.total)}</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="export-footer">Generated by Booking App</div>
-      <div style="margin-top:8px; text-align:center; font-size:13px; color:#333;"><strong>Processed by:</strong> ${escapeHtml(rec.processedBy || 'N/A')}</div>
-    `;
-
-    // Append card to wrapper and wrapper to body
-    wrapper.appendChild(card);
-    document.body.appendChild(wrapper);
-
-    try {
-      // Determine scale for crispness (especially on Retina displays)
-      const scale = Math.min(3, Math.max(2, window.devicePixelRatio || 1));
-
-      // Use html2canvas on the wrapper so the outer padding is included (white border)
-      const canvas = await html2canvas(wrapper, {
-        scale: scale,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        // allowTaint: true // optional if you are using images from other domains
+      // gather items
+      const items = [];
+      orderBody.querySelectorAll('tr').forEach(row => {
+        items.push({
+          generic: row.querySelector('.generic').value || '',
+          brand: row.querySelector('.brand').value || '',
+          qty: row.querySelector('.qty').value || 0,
+          unit: row.querySelector('.unit').value || '',
+          srp: row.querySelector('.srp').value || 0,
+          discountType: row.querySelector('.discountType').value || '',
+          discount: row.querySelector('.discount').value || 0,
+          discountAmt: row.querySelector('.discountAmt').value || 0,
+          total: row.querySelector('.total').value || 0,
+          remarks: row.querySelector('.remarksItem').value || ''
+        });
       });
 
-      // convert canvas to blob for robust handling and sharing
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
-      if (!blob) throw new Error('Failed to create image blob.');
+      const paymentType = (paymentSelect.value === 'Terms') ? `Terms (${termsDaysInput.value || '0'} days)` :
+                          (paymentSelect.value === 'Bank') ? `Bank - ${bankNameInput.value || ''}` :
+                          paymentSelect.value;
 
-      const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
-      const filename = `Booking_${safeName}_${(rec.date || '')}.jpeg`;
+      // timestamp
+      const createdAt = new Date().toLocaleString();
 
-      // Try Web Share API (files) first — best UX on mobile (especially iOS)
-      try {
-        const file = new File([blob], filename, { type: 'image/jpeg' });
+      const record = {
+        name: nameInput.value || '',
+        contact: contactInput.value || '',
+        delivery: deliveryInput.value || '',
+        address: addressInput.value || '',
+        date: dateInput.value || '',
+        time: timeInput.value || '',
+        payment: paymentType,
+        distributor: distributorInput.value || '',
+        remarks: remarksInput.value || '',
+        total: totalField.value || '0.00',
+        items: items,
+        createdAt: createdAt,
+        processedBy: processedByInput.value || ''
+      };
 
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          // Use navigator.share to open native share sheet if supported
-          await navigator.share({
-            files: [file],
-            title: filename,
-            text: `Booking: ${rec.name} — ${rec.date || ''}`
-          });
-          // remove wrapper and return
-          if (wrapper.parentNode) document.body.removeChild(wrapper);
-          return;
-        }
-      } catch (shareErr) {
-        // If share fails or the browser doesn't allow it, continue to fallback download
-        console.warn('Share API unavailable or failed — falling back to download.', shareErr);
+      // save to localStorage
+      const records = JSON.parse(localStorage.getItem('bookings')) || [];
+      records.push(record);
+      localStorage.setItem('bookings', JSON.stringify(records));
+
+      // reset form but leave UI stable
+      document.getElementById('bookingForm').reset();
+      orderBody.innerHTML = '';
+      addRow();
+      updateTotals();
+      totalField.value = '';
+
+      // reload list
+      loadRecords();
+
+      // focus name for quick next entry
+      nameInput.focus();
+    });
+
+    /* -------------------- Load records to UI -------------------- */
+    function loadRecords() {
+      const records = JSON.parse(localStorage.getItem('bookings')) || [];
+      recordList.innerHTML = '';
+      if (records.length === 0) {
+        recordList.innerHTML = '<p style="color:var(--muted);">No bookings yet.</p>';
+        return;
       }
 
-      // Fallback: create object URL and trigger anchor download
+      records.forEach((rec, idx) => {
+        const div = document.createElement('div');
+        div.className = 'record';
+
+        // Build inner HTML for record (escape HTML)
+        div.innerHTML = `
+          <h4>${escapeHtml(rec.name)} - ₱${escapeHtml(rec.total)}</h4>
+          <p>📞 ${escapeHtml(rec.contact)}<br>
+             🚚 ${escapeHtml(rec.delivery)}<br>
+             💳 ${escapeHtml(rec.payment)}<br>
+             🏢 ${escapeHtml(rec.distributor)}<br>
+             📍 ${escapeHtml(rec.address || 'N/A')}<br>
+             🕒 Created: ${escapeHtml(rec.createdAt || 'N/A')}</p>
+          <p><b>Remarks:</b> ${escapeHtml(rec.remarks || 'None')}</p>
+          <p><b>👤 Processed by:</b> ${escapeHtml(rec.processedBy || 'N/A')}</p>
+
+          <div style="margin-top:8px;">
+            <button class="btn" onclick="downloadExcel(${idx})">📄 Export Excel</button>
+            <button class="btn" onclick="downloadJPEG(${idx})">🖼 Download JPEG</button>
+            <button class="btn" onclick="downloadTXT(${idx})">📝 Export TXT</button>
+            <button class="btn danger" style="background:var(--danger)" onclick="deleteRecord(${idx})">🗑 Delete</button>
+          </div>
+
+          <details style="margin-top:10px;">
+            <summary style="cursor:pointer;">View Items (${rec.items.length})</summary>
+            <div style="overflow:auto; margin-top:8px;">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Disc Type</th><th>Disc Val</th><th>Disc Amt</th><th>Total</th><th>Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rec.items.map(item => `
+                    <tr>
+                      <td>${escapeHtml(item.generic)}</td>
+                      <td>${escapeHtml(item.brand)}</td>
+                      <td>${escapeHtml(item.qty)}</td>
+                      <td>${escapeHtml(item.unit)}</td>
+                      <td>${escapeHtml(item.srp)}</td>
+                      <td>${escapeHtml(item.discountType)}</td>
+                      <td>${escapeHtml(item.discount)}</td>
+                      <td>${escapeHtml(item.discountAmt)}</td>
+                      <td>${escapeHtml(item.total)}</td>
+                      <td>${escapeHtml(item.remarks)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        `;
+        recordList.appendChild(div);
+      });
+    }
+
+    /* -------------------- Delete record -------------------- */
+    function deleteRecord(index) {
+      const records = JSON.parse(localStorage.getItem('bookings')) || [];
+      if (!records[index]) return;
+      if (!confirm('Delete this booking?')) return;
+      records.splice(index, 1);
+      localStorage.setItem('bookings', JSON.stringify(records));
+      loadRecords();
+    }
+    window.deleteRecord = deleteRecord; // expose to inline onclick
+
+    /* -------------------- Export Excel -------------------- */
+    function downloadExcel(index) {
+      const records = JSON.parse(localStorage.getItem('bookings')) || [];
+      const rec = records[index];
+      if (!rec) return alert('Record not found.');
+
+      // Prepare worksheet data as array of arrays
+      const wsData = [
+        ['Booking for', rec.name],
+        ['Contact', rec.contact],
+        ['Delivery', rec.delivery],
+        ['Address', rec.address || 'N/A'],
+        ['Preferred Date & Time', `${rec.date} ${rec.time}`],
+        ['Payment', rec.payment],
+        ['Distributor', rec.distributor],
+        ['Remarks', rec.remarks || 'None'],
+        ['Processed By', rec.processedBy || 'N/A'],
+        ['Created At', rec.createdAt || 'N/A'],
+        [],
+        ['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']
+      ];
+
+      rec.items.forEach(item => {
+        wsData.push([
+          item.generic, item.brand, item.qty, item.unit, item.srp,
+          item.discountType, item.discount, item.discountAmt, item.total, item.remarks
+        ]);
+      });
+
+      wsData.push(['','','','','','','','','Total Amount', rec.total]);
+
+      // create workbook & worksheet
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+      // auto column width (simple heuristic)
+      const headerRowIndex = 10;
+      const colWidths = wsData[headerRowIndex].map((_, i) => {
+        const max = Math.max(...wsData.map(r => (r[i] ? String(r[i]).length : 0)));
+        return { wch: Math.min(Math.max(max + 2, 10), 40) };
+      });
+      ws['!cols'] = colWidths;
+
+      XLSX.utils.book_append_sheet(wb, ws, 'Booking');
+      const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
+      const filename = `Booking_${safeName}_${(rec.date || '')}.xlsx`;
+      XLSX.writeFile(wb, filename);
+    }
+    window.downloadExcel = downloadExcel;
+
+    /* -------------------- Export JPEG (centered with margin) -------------------- */
+    async function downloadJPEG(index) {
+      const records = JSON.parse(localStorage.getItem('bookings')) || [];
+      const rec = records[index];
+      if (!rec) return alert('Record not found.');
+
+      // Create export wrapper and centered card (this will be rendered by html2canvas)
+      const wrapper = document.createElement('div');
+      wrapper.className = 'export-wrapper';
+
+      // Offscreen but still renderable — keep it accessible to html2canvas
+      wrapper.style.position = 'fixed';
+      wrapper.style.left = '-9999px'; // place offscreen to avoid flicker on UI
+      wrapper.style.top = '0';
+      wrapper.style.zIndex = 99999;
+
+      // Outer margin to ensure white space around content when rendered
+      // This outer padding acts as the "white border" you requested
+      wrapper.style.padding = '48px'; // <-- adjust this value for thicker/thinner border
+      wrapper.style.background = '#ffffff';
+
+      const card = document.createElement('div');
+      card.className = 'export-card';
+
+      // Compose HTML for export card (centered and fixed width)
+      card.innerHTML = `
+        <h2>📦 Booking Summary</h2>
+        <p><b>Booking for:</b> ${escapeHtml(rec.name)}</p>
+        <p><b>Contact:</b> ${escapeHtml(rec.contact)}</p>
+        <p><b>Delivery:</b> ${escapeHtml(rec.delivery)}</p>
+        <p><b>Address:</b> ${escapeHtml(rec.address || 'N/A')}</p>
+        <p><b>Preferred Date & Time:</b> ${escapeHtml(rec.date)} ${escapeHtml(rec.time)}</p>
+        <p><b>Payment:</b> ${escapeHtml(rec.payment)}</p>
+        <p><b>Distributor:</b> ${escapeHtml(rec.distributor)}</p>
+        <p><b>Remarks / Special Instructions:</b> ${escapeHtml(rec.remarks || 'None')}</p>
+        <p><b>Created At:</b> ${escapeHtml(rec.createdAt || 'N/A')}</p>
+        <br>
+        <table class="export-table" role="table" aria-label="items">
+          <thead>
+            <tr>
+              <th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Disc Type</th><th>Disc Val</th><th>Disc Amt</th><th>Total</th><th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rec.items.map(it => `
+              <tr>
+                <td>${escapeHtml(it.generic)}</td>
+                <td>${escapeHtml(it.brand)}</td>
+                <td>${escapeHtml(it.qty)}</td>
+                <td>${escapeHtml(it.unit)}</td>
+                <td>${escapeHtml(it.srp)}</td>
+                <td>${escapeHtml(it.discountType)}</td>
+                <td>${escapeHtml(it.discount)}</td>
+                <td>${escapeHtml(it.discountAmt)}</td>
+                <td>${escapeHtml(it.total)}</td>
+                <td style="white-space:normal; word-wrap:break-word; max-width:200px; text-align:left;">${escapeHtml(it.remarks)}</td>
+              </tr>
+            `).join('')}
+            <tr>
+              <td colspan="8" style="text-align:right; font-weight:bold;">Total Amount</td>
+              <td colspan="2" style="font-weight:bold;">₱${escapeHtml(rec.total)}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="export-footer">Generated by Booking App</div>
+        <div style="margin-top:8px; text-align:center; font-size:13px; color:#333;"><strong>Processed by:</strong> ${escapeHtml(rec.processedBy || 'N/A')}</div>
+      `;
+
+      // Append card to wrapper and wrapper to body
+      wrapper.appendChild(card);
+      document.body.appendChild(wrapper);
+
+      try {
+        // Determine scale for crispness (especially on Retina displays)
+        const scale = Math.min(3, Math.max(2, window.devicePixelRatio || 1));
+
+        // Use html2canvas on the wrapper so the outer padding is included (white border)
+        const canvas = await html2canvas(wrapper, {
+          scale: scale,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          // allowTaint: true // optional if you are using images from other domains
+        });
+
+        // convert canvas to blob for robust handling and sharing
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+        if (!blob) throw new Error('Failed to create image blob.');
+
+        const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
+        const filename = `Booking_${safeName}_${(rec.date || '')}.jpeg`;
+
+        // Try Web Share API (files) first — best UX on mobile (especially iOS)
+        try {
+          const file = new File([blob], filename, { type: 'image/jpeg' });
+
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            // Use navigator.share to open native share sheet if supported
+            await navigator.share({
+              files: [file],
+              title: filename,
+              text: `Booking: ${rec.name} — ${rec.date || ''}`
+            });
+            // remove wrapper and return
+            if (wrapper.parentNode) document.body.removeChild(wrapper);
+            return;
+          }
+        } catch (shareErr) {
+          // If share fails or the browser doesn't allow it, continue to fallback download
+          console.warn('Share API unavailable or failed — falling back to download.', shareErr);
+        }
+
+        // Fallback: create object URL and trigger anchor download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+
+        // Append anchor and simulate click
+        document.body.appendChild(a);
+        a.click();
+
+        // cleanup
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+          if (a.parentNode) a.parentNode.removeChild(a);
+        }, 1000);
+
+        // Remove wrapper now that export is done
+        if (wrapper.parentNode) document.body.removeChild(wrapper);
+      } catch (err) {
+        // Ensure wrapper is removed on error
+        if (wrapper.parentNode) document.body.removeChild(wrapper);
+        console.error('Export to JPEG failed:', err);
+        alert('Image export failed: ' + (err && err.message ? err.message : err));
+      }
+    }
+    window.downloadJPEG = downloadJPEG;
+
+    /* -------------------- Export TXT (formatted & bullet style) -------------------- */
+    function downloadTXT(index) {
+      const records = JSON.parse(localStorage.getItem('bookings')) || [];
+      const rec = records[index];
+      if (!rec) return alert('Record not found.');
+
+      let txt = '';
+      txt += `📦 BOOKING SUMMARY\n`;
+      txt += `=====================================================\n\n`;
+
+      txt += `• Name of Account (MD/Patient): ${rec.name}\n`;
+      txt += `• Contact Number: ${rec.contact}\n`;
+      txt += `• Delivery Option: ${rec.delivery}\n`;
+      txt += `• Address: ${rec.address || 'N/A'}\n`;
+      txt += `• Preferred Date & Time: ${rec.date} ${rec.time}\n`;
+      txt += `• Payment Option: ${rec.payment}\n`;
+      txt += `• Distributor & Branch: ${rec.distributor}\n`;
+      txt += `• Processed By: ${rec.processedBy || 'N/A'}\n`;
+      txt += `• Created At: ${rec.createdAt}\n`;
+      txt += `• Remarks / Special Instructions: ${rec.remarks || 'None'}\n`;
+
+      txt += `\n🧾 ORDER DETAILS\n`;
+      txt += `-----------------------------------------------------\n`;
+
+      rec.items.forEach((it, i) => {
+        txt += `  ${i + 1}. ${it.generic || 'N/A'} (${it.brand || 'No Brand'})\n`;
+        txt += `     - Qty: ${it.qty} ${it.unit}\n`;
+        txt += `     - SRP: ₱${it.srp}\n`;
+        txt += `     - Discount: ${it.discountType} (${it.discount})\n`;
+        txt += `     - Discount Amount: ₱${it.discountAmt}\n`;
+        txt += `     - Total: ₱${it.total}\n`;
+        if (it.remarks) txt += `     - Remarks: ${it.remarks}\n`;
+        txt += `\n`;
+      });
+
+      txt += `-----------------------------------------------------\n`;
+      txt += `TOTAL AMOUNT: ₱${rec.total}\n`;
+      txt += `=====================================================\n`;
+      txt += `Generated by Booking App\n`;
+
+      // create and download blob
+      const blob = new Blob([txt], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
+      const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
+      const filename = `Booking_${safeName}_${(rec.date || '')}.txt`;
+
       const a = document.createElement('a');
       a.href = url;
       a.download = filename;
-
-      // Append anchor and simulate click
       document.body.appendChild(a);
       a.click();
-
-      // cleanup
       setTimeout(() => {
         URL.revokeObjectURL(url);
-        if (a.parentNode) a.parentNode.removeChild(a);
+        a.remove();
       }, 1000);
-
-      // Remove wrapper now that export is done
-      if (wrapper.parentNode) document.body.removeChild(wrapper);
-    } catch (err) {
-      // Ensure wrapper is removed on error
-      if (wrapper.parentNode) document.body.removeChild(wrapper);
-      console.error('Export to JPEG failed:', err);
-      alert('Image export failed: ' + (err && err.message ? err.message : err));
     }
-  }
-  window.downloadJPEG = downloadJPEG;
+    window.downloadTXT = downloadTXT;
 
-  /* -------------------- helpers -------------------- */
+    /* -------------------- helpers -------------------- */
 
-  // escapeHtml - prevent HTML injection when rendering user-provided strings
-  function escapeHtml(str) {
-    if (str === null || str === undefined) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-  }
+    // escapeHtml - prevent HTML injection when rendering user-provided strings
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
 
-  /* -------------------- initial load -------------------- */
-  // Populate the saved records list from localStorage when the page loads.
-  loadRecords();
+    /* -------------------- initial load -------------------- */
+    // Populate the saved records list from localStorage when the page loads.
+    loadRecords();
 
-  // End of script
+    // End of script
   </script>
 
   <!-- End of body -->
