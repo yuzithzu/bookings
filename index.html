@@ -202,13 +202,87 @@
 
     /* Accessibility helpers */
     [role="button"]{ cursor: pointer; }
+    
+    /* Dark mode styles */
+    body.dark-mode {
+      --bg: #1a1a1a;
+      --card: #2d2d2d;
+      --text: #f0f0f0;
+      --border: #444;
+    }
+    
+    body.dark-mode .sidebar {
+      background: #0d47a1;
+    }
+    
+    body.dark-mode .record {
+      background: #333;
+      border-color: #444;
+    }
+    
+    body.dark-mode input, 
+    body.dark-mode select, 
+    body.dark-mode textarea {
+      background: #333;
+      color: #f0f0f0;
+      border-color: #444;
+    }
+    
+    body.dark-mode .export-card {
+      background: #2d2d2d;
+      color: #f0f0f0;
+    }
+    
+    body.dark-mode .export-table th {
+      background: #0d47a1;
+    }
+    
+    body.dark-mode .sidebar h2,
+    body.dark-mode .sidebar .nav-item,
+    body.dark-mode .sidebar .nav-item.active {
+      color: #fff;
+    }
+    
+    body.dark-mode .summary,
+    body.dark-mode .record h4,
+    body.dark-mode .record p {
+      color: #f0f0f0;
+    }
+    
+    /* Enhanced date/time display */
+    .datetime-display {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 12px 15px;
+      text-align: center;
+      width: 100%;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .datetime-display strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 4px;
+      color: #fff;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
   <!-- Sidebar -->
   <div class="sidebar" role="navigation" aria-label="Main navigation">
     <h2>📦 Booking App</h2>
+    <div class="datetime-display" id="currentDateTime">
+      <strong>Loading...</strong>
+      <span>Just a moment</span>
+    </div>
     <div class="nav-item active" role="button" aria-pressed="true">Booking</div>
+    <button id="darkModeToggle" class="btn secondary" style="margin-top: 10px;">🌙 Dark Mode</button>
   </div>
 
   <!-- Main content -->
@@ -252,7 +326,7 @@
             <label for="payment">Payment Option:</label>
             <select id="payment">
               <option value="C.O.D">C.O.D (Cash on Delivery)</option>
-              <option value="C.O.D">C.O.P (Cash on PICK UP)</option>              
+              <option value="C.O.P">C.O.P (Cash on PICK UP)</option>              
               <option value="Terms">Terms</option>
               <option value="PDC">PDC (Post Dated Check)</option>
               <option value="Bank">Deposited thru Bank</option>
@@ -360,6 +434,8 @@
 
     const saveBookingBtn = document.getElementById('saveBooking');
     const recordList = document.getElementById('recordList');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const currentDateTimeElement = document.getElementById('currentDateTime');
 
     /* -------------------- Payment toggle -------------------- */
     paymentSelect.addEventListener('change', () => {
@@ -661,7 +737,7 @@
       ws['!cols'] = colWidths;
 
       XLSX.utils.book_append_sheet(wb, ws, 'Booking');
-      const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
+      const safeName = (rec.name || 'Booking').replace(/[\\\\/:*?\"<>|]/g, '_');
       const filename = `Booking_${safeName}_${(rec.date || '')}.xlsx`;
       XLSX.writeFile(wb, filename);
     }
@@ -755,7 +831,7 @@
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
         if (!blob) throw new Error('Failed to create image blob.');
 
-        const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
+        const safeName = (rec.name || 'Booking').replace(/[\\\\/:*?\"<>|]/g, '_');
         const filename = `Booking_${safeName}_${(rec.date || '')}.jpeg`;
 
         // Try Web Share API (files) first — best UX on mobile (especially iOS)
@@ -805,7 +881,7 @@
     }
     window.downloadJPEG = downloadJPEG;
 
-    /* -------------------- Export TXT (formatted & bullet style) -------------------- */
+    /* -------------------- Export TXT (cleaned up with proper bullet points) -------------------- */
     function downloadTXT(index) {
       const records = JSON.parse(localStorage.getItem('bookings')) || [];
       const rec = records[index];
@@ -875,6 +951,54 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
     }
+
+    /* -------------------- Dark Mode Toggle -------------------- */
+    darkModeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    });
+
+    // Check for saved preference
+    if (localStorage.getItem('darkMode') === 'true') {
+      document.body.classList.add('dark-mode');
+    }
+
+    /* -------------------- Update Current Date and Time -------------------- */
+    function updateDateTime() {
+      const now = new Date();
+      const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      };
+      const formattedDate = now.toLocaleDateString('en-US', options);
+      
+      // Update the datetime display with better formatting
+      currentDateTimeElement.innerHTML = `
+        <strong>${formattedDate.split(',')[0]}</strong>
+        <span>${formattedDate.split(',')[1]}</span>
+      `;
+    }
+
+    // Update immediately and then every second
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
+
+    /* -------------------- Keyboard Shortcuts -------------------- */
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        saveBookingBtn.click();
+      }
+      if (e.key === 'Escape') {
+        document.getElementById('bookingForm').reset();
+        orderBody.innerHTML = '';
+        addRow();
+        updateTotals();
+      }
+    });
 
     /* -------------------- initial load -------------------- */
     // Populate the saved records list from localStorage when the page loads.
