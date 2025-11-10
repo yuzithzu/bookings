@@ -1,1083 +1,442 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>📦 Booking App — Full (Single Copy with Centered JPEG Export)</title>
-
-  <!-- External libraries -->
-  <!-- SheetJS (Excel export) -->
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-  <!-- html2canvas (JPEG export) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-  <!-- Styles -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Product & Materials Calculator</title>
   <style>
-    /* =========================================================================
-       Booking App Stylesheet
-       - Purpose: complete single-file booking app UI + export functions
-       - Notes: styles keep layout consistent on desktop and mobile
-       ========================================================================= */
-
     :root{
-      --main: #0d6efd;
-      --accent: #0d6efd;
-      --danger: #dc3545;
-      --muted: #6c757d;
-      --bg: #f4f6f9;
-      --card: #ffffff;
-      --border: #e6e9ee;
-      --text: #222;
-      --shadow: rgba(15,15,15,0.06);
+      --bg:#0b1220;
+      --card:#0f1724;
+      --muted:#94a3b8;
+      --accent:#6ee7b7;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.02);
     }
-
-    *{
-      box-sizing: border-box;
-      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-
-    html, body{ height: 100%; }
-
+    *{box-sizing:border-box}
     body{
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      margin:0;
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      background: linear-gradient(180deg,#071024 0%, #071032 100%);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
 
-    /* ---------- Sidebar ---------- */
-    .sidebar{
-      width: 230px;
-      background: var(--main);
-      color: #fff;
-      padding: 22px 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
+    .wrap{max-width:1150px;margin:28px auto;padding:20px;}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+    header h1{margin:0;font-size:20px;color:var(--accent)}
+    header .muted{color:var(--muted)}
 
-    .sidebar h2{ margin: 0 0 18px; font-size: 18px; }
-    .nav-item{
-      width: 100%;
-      text-align: center;
-      padding: 10px 6px;
-      cursor: pointer;
-      border-radius: 8px;
-      margin-bottom: 6px;
-    }
-    .nav-item.active, .nav-item:hover{ background: rgba(255,255,255,0.12); }
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
 
-    /* ---------- Main Container ---------- */
-    .main{ flex: 1; padding: 18px; overflow: auto; }
-    .container{ max-width: 1100px; margin: 0 auto; }
-    h1{ color: var(--main); text-align: center; margin-bottom: 12px; font-size: 20px; }
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.03);
+      box-shadow:0 8px 22px rgba(2,6,23,0.6);
+    }
+    h2{margin:0 0 10px 0;color:var(--accent);font-size:16px}
+    .muted{color:var(--muted);font-size:13px}
 
-    /* ---------- Card / Form ---------- */
-    form.card{
-      background: var(--card);
-      border-radius: 12px;
-      padding: 18px;
-      box-shadow: 0 6px 18px var(--shadow);
-      margin-bottom: 18px;
+    /* product manager */
+    .controls{display:flex;flex-wrap:wrap;gap:8px}
+    .controls input[type=text], .controls input[type=number], .controls button{
+      padding:9px 10px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;
     }
+    .btn{background:linear-gradient(90deg,var(--accent), #3dd6b6); border:none; padding:9px 12px; border-radius:10px; color:#042018; font-weight:700; cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(255,255,255,0.04)}
+    .small{padding:7px 9px;font-size:14px}
 
-    label{ display: block; font-weight: 600; margin-top: 10px; font-size: 13px; }
+    .list{margin-top:12px;max-height:220px;overflow:auto;padding-right:6px}
+    .item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;margin-bottom:8px;background:var(--glass);}
+    .item .title{flex:1}
+    .price{font-weight:700}
 
-    input[type="text"],
-    input[type="tel"],
-    input[type="number"],
-    input[type="date"],
-    input[type="time"],
-    select,
-    textarea{
-      width: 100%;
-      padding: 8px 10px;
-      margin-top: 6px;
-      border-radius: 8px;
-      border: 1px solid #d0d7de;
-      font-size: 14px;
-      color: var(--text);
-      background: #fff;
-    }
+    /* calculator */
+    .table-head{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px;padding:6px 4px 0 4px}
+    .table-head div{flex-basis:0;flex-grow:1}
+    .table-head .col-small{flex-basis:90px;flex-grow:0}
+    .rows{max-height:360px;overflow:auto;margin-top:10px}
+    .calc-row{display:flex;gap:8px;align-items:center;padding:10px;border-radius:10px;margin-bottom:8px;background:var(--glass)}
+    .calc-row select, .calc-row input{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:inherit}
+    .calc-row .col-material{width:34%}
+    .calc-row .col-pcs{width:10%}
+    .calc-row .col-desc{width:30%}
+    .calc-row .col-price{width:12%}
+    .calc-row .col-per{width:12%;font-weight:700}
 
-    textarea{ resize: vertical; min-height: 60px; }
+    .row-actions{display:flex;gap:8px}
+    .row-actions button{padding:7px 9px;border-radius:8px;font-size:13px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--accent);cursor:pointer}
 
-    .flex-row{ display:flex; gap:10px; align-items:center; }
-    .flex-row > *{ flex: 1; }
+    .bottom{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:12px}
+    .calc-summary{min-width:220px;background:var(--glass-2);padding:12px;border-radius:10px}
+    .calc-row small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
 
-    .btn{
-      display: inline-block;
-      background: var(--accent);
-      color: #fff;
-      padding: 9px 12px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 12px;
-      font-size: 14px;
-    }
-    .btn.secondary{ background: #6c757d; }
-    .btn.danger{ background: var(--danger); }
-    .btn.small{ padding: 6px 8px; font-size: 13px; }
+    .markup-section{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.02)}
+    .markup-item{padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+    .markup-item:last-child{border-bottom:none}
+    .muted-sm{color:var(--muted);font-size:13px}
 
-    /* ---------- Table (items) ---------- */
-    .table-responsive{ overflow-x: auto; margin-top: 10px; }
-    table{ width: 100%; border-collapse: collapse; min-width: 900px; table-layout: fixed; }
-    th, td{ border: 1px solid var(--border); padding: 8px; font-size: 13px; vertical-align: top; text-align: center; }
-    th{ background: var(--main); color: #fff; font-weight: 700; }
-    td input, td select{ width: 100%; padding: 6px; box-sizing: border-box; border-radius: 6px; border: 1px solid #e6e9ee; }
-
-    /* wrap remarks column */
-    td.remarksCol, th.remarksCol{
-      max-width: 220px;
-      word-wrap: break-word;
-      white-space: normal;
-      overflow-wrap: break-word;
-      text-align: left;
-    }
-
-    .small{ padding: 6px 8px; font-size: 13px; }
-
-    /* record list */
-    .summary{
-      background: var(--card);
-      padding: 14px;
-      border-radius: 10px;
-      box-shadow: 0 6px 18px rgba(15,15,15,0.04);
-    }
-    
-    .summary-header {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    
-    .search-container {
-      display: flex;
-      gap: 10px;
-    }
-    
-    .search-container input {
-      flex: 1;
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 1px solid #d0d7de;
-      font-size: 14px;
-    }
-    
-    .search-container button {
-      padding: 8px 15px;
-      border-radius: 8px;
-      border: none;
-      background: var(--main);
-      color: white;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    
-    .record-list-container {
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-    }
-
-    .record{
-      border: 1px solid var(--border);
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      background: #fafbff;
-    }
-    .record h4{ margin: 0 0 6px; color: var(--main); font-size: 16px; }
-    .record p{ margin: 4px 0; color: #333; font-size: 14px; }
-
-    /* responsive adjustments */
-    @media (max-width: 900px){
-      .sidebar{ display: none; }
-      table{ min-width: 720px; }
-      .container{ padding: 12px; }
-    }
-
-    /* ---------- Export (hidden but styled) ---------- */
-    /* Export wrapper will be appended temporarily to body for html2canvas capture */
-    .export-wrapper{
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fff;
-      color: #222;
-      /* The offscreen positioning will be applied dynamically but styling kept here */
-    }
-
-    .export-card{
-      /* This width defines the content width of the exported JPEG.
-         Adjust this value if you want a wider or narrower exported image. */
-      width: 900px;
-      max-width: 920px;
-      font-family: "Poppins", sans-serif;
-      color: #222;
-      background: #fff;
-      padding: 20px;
-      border-radius: 6px;
-    }
-
-    .export-card h2{ margin: 0 0 10px; text-align: center; color: var(--main); font-size: 18px; }
-    .export-card p{ margin: 6px 0; font-size: 13px; }
-
-    .export-table{ width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
-    .export-table th, .export-table td{ border: 1px solid #e6e9ee; padding: 6px; text-align: center; }
-    .export-table thead th{ background: var(--main); color: #fff; font-weight: 700; }
-
-    /* small print for export */
-    .export-footer{ margin-top: 12px; font-size: 12px; color: var(--muted); text-align: center; }
-
-    /* Accessibility helpers */
-    [role="button"]{ cursor: pointer; }
-    
-    /* Dark mode styles */
-    body.dark-mode {
-      --bg: #1a1a1a;
-      --card: #2d2d2d;
-      --text: #f0f0f0;
-      --border: #444;
-    }
-    
-    body.dark-mode .sidebar {
-      background: #0d47a1;
-    }
-    
-    body.dark-mode .record {
-      background: #333;
-      border-color: #444;
-    }
-    
-    body.dark-mode input, 
-    body.dark-mode select, 
-    body.dark-mode textarea {
-      background: #333;
-      color: #f0f0f0;
-      border-color: #444;
-    }
-    
-    body.dark-mode .export-card {
-      background: #2d2d2d;
-      color: #f0f0f0;
-    }
-    
-    body.dark-mode .export-table th {
-      background: #0d47a1;
-    }
-    
-    body.dark-mode .sidebar h2,
-    body.dark-mode .sidebar .nav-item,
-    body.dark-mode .sidebar .nav-item.active {
-      color: #fff;
-    }
-    
-    body.dark-mode .summary,
-    body.dark-mode .record h4,
-    body.dark-mode .record p {
-      color: #f0f0f0;
-    }
-    
-    /* Enhanced date/time display */
-    .datetime-display {
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
-      padding: 12px 15px;
-      text-align: center;
-      width: 100%;
-      font-size: 14px;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      margin-bottom: 10px;
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .datetime-display strong {
-      display: block;
-      font-size: 16px;
-      margin-bottom: 4px;
-      color: #fff;
-      font-weight: 600;
-    }
+    footer{margin-top:22px;text-align:center;color:var(--muted);font-size:13px}
   </style>
 </head>
 <body>
-  <!-- Sidebar -->
-  <div class="sidebar" role="navigation" aria-label="Main navigation">
-    <h2>📦 Booking App</h2>
-    <div class="datetime-display" id="currentDateTime">
-      <strong>Loading...</strong>
-      <span>Just a moment</span>
-    </div>
-    <div class="nav-item active" role="button" aria-pressed="true">Booking</div>
-    <button id="darkModeToggle" class="btn secondary" style="margin-top: 10px;">🌙 Dark Mode</button>
-  </div>
-
-  <!-- Main content -->
-  <div class="main">
-    <div class="container">
-      <h1>Booking Form</h1>
-
-      <!-- FORM -->
-      <form id="bookingForm" class="card" autocomplete="off" novalidate>
-        <div style="display:flex; gap:12px; align-items:flex-start;">
-          <div style="flex:1;">
-            <label for="name">Name of Account (MD/Patient):</label>
-            <input id="name" type="text" required placeholder="Enter name">
-
-            <label for="contact">Contact Number:</label>
-            <input id="contact" type="tel" required placeholder="09xx-xxx-xxxx">
-
-            <label for="delivery">Delivery Option:</label>
-            <select id="delivery" aria-label="Delivery option">
-              <option>Pick-Up (by client at office)</option>
-              <option>Pick-Up (by Medrep / DR at office)</option>
-              <option>Delivery (by MANILA branch rider to hub (CSP)</option>
-              <option>Delivery (by MANILA branch rider to Doctor)</option>
-              <option selected>Pick-Up by Lalamove / Grab / Courier</option>
-            </select>
-
-            <label for="address">Pick-Up / Delivery Address:</label>
-            <textarea id="address" rows="2" placeholder="Address"></textarea>
-
-            <div class="flex-row">
-              <div>
-                <label for="date">Preferred Date</label>
-                <input id="date" type="date">
-              </div>
-              <div>
-                <label for="time">Preferred Time</label>
-                <input id="time" type="time">
-              </div>
-            </div>
-
-            <label for="payment">Payment Option:</label>
-            <select id="payment">
-              <option value="C.O.D">C.O.D (Cash on Delivery)</option>
-              <option value="C.O.P">C.O.P (Cash on PICK UP)</option>              
-              <option value="Terms">Terms</option>
-              <option value="PDC">PDC (Post Dated Check)</option>
-              <option value="Bank">Deposited thru Bank</option>
-            </select>
-
-            <div id="termsDaysContainer" style="display:none;">
-              <label for="termsDays">Terms (Days):</label>
-              <input id="termsDays" type="number" min="1" placeholder="Enter number of days">
-            </div>
-
-            <div id="bankContainer" style="display:none;">
-              <label for="bankName">Bank Name:</label>
-              <input id="bankName" type="text" placeholder="e.g. BPI, BDO, Metrobank">
-            </div>
-          </div>
-
-          <div style="width:320px;">
-            <label for="distributor">Distributor & Branch:</label>
-            <input id="distributor" type="text" placeholder="Distributor name">
-
-            <label for="remarks">Remarks / Special Instructions:</label>
-            <textarea id="remarks" rows="6" placeholder="Notes for rider, special handling, etc."></textarea>
-
-            <label for="total">Total Amount (₱):</label>
-            <input id="total" type="number" readonly step="0.01" placeholder="0.00">
-
-            <button id="saveBooking" class="btn" style="width:100%;">Save Booking</button>
-
-            <!-- NEW: Processed By input placed after Save Booking button as requested -->
-            <label for="processedBy">Processed By:</label>
-            <input id="processedBy" type="text" placeholder="Enter name of person who processed this booking">
-          </div>
-        </div>
-
-        <!-- Items table -->
-        <label style="margin-top:14px;">Order Details:</label>
-        <div class="table-responsive" role="region" aria-label="Order items">
-          <table id="orderTable" aria-label="Order items table">
-            <thead>
-              <tr>
-                <th style="width:110px">Generic</th>
-                <th style="width:110px">Brand</th>
-                <th style="width:110px">Qty</th>
-                <th style="width:100px">Unit</th>
-                <th style="width:110px">SRP</th>
-                <th style="width:120px">Discount Type</th>
-                <th style="width:120px">Discount Value</th>
-                <th style="width:120px">Discount Amt</th>
-                <th style="width:120px">No Discount</th>
-                <th style="width:120px">Remarks</th>
-                <th style="width:110px">Total</th>
-                <th style="width:60px">🗑</th>
-              </tr>
-            </thead>
-            <tbody id="orderBody" aria-live="polite"></tbody>
-          </table>
-        </div>
-
-        <div style="display:flex; gap:10px; margin-top:10px;">
-          <button type="button" id="addRow" class="btn secondary" style="background:#198754">+ Add Item</button>
-          <button type="button" id="clearItems" class="btn secondary" style="background:#6c757d">Clear Items</button>
-        </div>
-      </form>
-
-      <!-- SUMMARY / RECORDS -->
-      <div class="summary" aria-live="polite">
-        <h3 style="margin-top:0;">Saved Bookings</h3>
-        <div class="summary-header">
-          <div class="search-container">
-            <input type="text" id="searchInput" placeholder="Search by booking name...">
-            <button id="searchButton">🔍 Search</button>
-          </div>
-        </div>
-        <div class="record-list-container" id="recordList">
-          <!-- Records will be loaded here -->
-        </div>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>🛒 Product Manager & Materials Calculator</h1>
+        <div class="muted">Add products → use them in materials rows → per-sheet markup computations</div>
       </div>
+      <div style="margin-left:auto" class="muted">Autosave: LocalStorage</div>
+    </header>
+
+    <div class="grid">
+      <!-- Product Manager -->
+      <section class="card">
+        <h2>Product Manager</h2>
+        <p class="muted">Add or update products. Prices saved to browser.</p>
+
+        <div style="margin-top:12px" class="controls">
+          <input id="productName" type="text" placeholder="Product name (e.g. girl)" />
+          <input id="productPrice" type="number" step="0.01" placeholder="Price (₱)" />
+          <button id="addUpdateBtn" class="btn small">Add / Update</button>
+          <button id="clearAllBtn" class="btn ghost small">Clear All</button>
+        </div>
+
+        <div style="margin-top:12px; display:flex; gap:8px; align-items:center">
+          <button id="deleteSelectedBtn" class="btn small ghost">Delete Selected</button>
+          <div style="margin-left:auto" class="muted-sm">Total products: <span id="totalCount">0</span></div>
+        </div>
+
+        <div class="list" id="productList" aria-live="polite"></div>
+      </section>
+
+      <!-- Materials Calculator -->
+      <section class="card">
+        <h2>Materials Calculator</h2>
+        <p class="muted">Enter materials rows — Per Sheet is Price ÷ PCS. Markup uses Per Sheet.</p>
+
+        <div class="table-head" aria-hidden="true">
+          <div class="col-material">Materials</div>
+          <div class="col-pcs">Pcs</div>
+          <div class="col-desc">Description</div>
+          <div class="col-price">Price</div>
+          <div class="col-per">Per Sheet</div>
+          <div style="width:120px"></div>
+        </div>
+
+        <div class="rows" id="rowsContainer"></div>
+
+        <div style="margin-top:10px; display:flex; gap:8px; align-items:center">
+          <button id="addRowBtn" class="btn small">+ Add Row</button>
+
+          <div style="margin-left:auto; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <label class="muted-sm">Tax %:
+              <input id="taxPercent" type="number" step="0.01" value="0" style="width:80px;margin-left:6px" />
+            </label>
+
+            <div class="calc-summary" style="min-width:180px">
+              <div class="muted-sm">Total Materials</div>
+              <div style="font-weight:700; font-size:18px">₱ <span id="materialsTotal">0.00</span></div>
+              <div class="muted-sm" style="margin-top:6px">Tax (₱)</div>
+              <div style="font-weight:700; font-size:16px">₱ <span id="taxAmount">0.00</span></div>
+              <div class="muted-sm" style="margin-top:8px">Total + Tax</div>
+              <div style="font-weight:700; font-size:14px">₱ <span id="totalWithTax">0.00</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="markup-section" style="margin-top:12px">
+          <div class="muted-sm">Markup Computations (based on Per Sheet)</div>
+          <div id="markupContainer" style="margin-top:8px"></div>
+        </div>
+      </section>
     </div>
+
+    <footer>Built responsive · LocalStorage autosave · PCS default is blank</footer>
   </div>
 
-  <!-- Scripts -->
   <script>
-    /* =========================================================================
-       Booking App Script
-       - Full features:
-         * Add / remove item rows
-         * Auto-calculation for discounts and totals
-         * Save/load bookings to localStorage
-         * Export to Excel (SheetJS)
-         * Export to JPEG (html2canvas) — centered with white margins
-       ========================================================================= */
+    // Formatter
+    const fmt = (n) => Number(n || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
 
-    /* -------------------- Elements -------------------- */
-    const nameInput = document.getElementById('name');
-    const contactInput = document.getElementById('contact');
-    const deliveryInput = document.getElementById('delivery');
-    const addressInput = document.getElementById('address');
-    const dateInput = document.getElementById('date');
-    const timeInput = document.getElementById('time');
-    const paymentSelect = document.getElementById('payment');
-    const termsDaysContainer = document.getElementById('termsDaysContainer');
-    const termsDaysInput = document.getElementById('termsDays');
-    const bankContainer = document.getElementById('bankContainer');
-    const bankNameInput = document.getElementById('bankName');
-    const distributorInput = document.getElementById('distributor');
-    const remarksInput = document.getElementById('remarks');
-    const totalField = document.getElementById('total');
-    const processedByInput = document.getElementById('processedBy');
+    // Elements - Products
+    const productName = document.getElementById('productName');
+    const productPrice = document.getElementById('productPrice');
+    const addUpdateBtn = document.getElementById('addUpdateBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const productList = document.getElementById('productList');
+    const totalCount = document.getElementById('totalCount');
 
-    const addRowBtn = document.getElementById('addRow');
-    const clearItemsBtn = document.getElementById('clearItems');
-    const orderBody = document.getElementById('orderBody');
+    // Elements - Materials
+    const rowsContainer = document.getElementById('rowsContainer');
+    const addRowBtn = document.getElementById('addRowBtn');
+    const taxPercentInput = document.getElementById('taxPercent');
+    const materialsTotalEl = document.getElementById('materialsTotal');
+    const taxAmountEl = document.getElementById('taxAmount');
+    const totalWithTaxEl = document.getElementById('totalWithTax');
+    const markupContainer = document.getElementById('markupContainer');
 
-    const saveBookingBtn = document.getElementById('saveBooking');
-    const recordList = document.getElementById('recordList');
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const currentDateTimeElement = document.getElementById('currentDateTime');
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
+    // Storage keys
+    const PRODUCTS_KEY = 'pm_products_v1';
+    const ROWS_KEY = 'pm_materials_v1';
 
-    /* -------------------- Payment toggle -------------------- */
-    paymentSelect.addEventListener('change', () => {
-      const val = paymentSelect.value;
-      termsDaysContainer.style.display = (val === 'Terms') ? 'block' : 'none';
-      bankContainer.style.display = (val === 'Bank') ? 'block' : 'none';
-    });
+    // State
+    let products = JSON.parse(localStorage.getItem(PRODUCTS_KEY) || '[]');
+    let rows = JSON.parse(localStorage.getItem(ROWS_KEY) || '[]');
 
-    /* -------------------- Add one default row on load -------------------- */
-    // We'll create a function for adding rows below and call once now.
-    addRow();
-
-    /* -------------------- Functions: addRow, updateTotals -------------------- */
-    function addRow() {
-      const tr = document.createElement('tr');
-
-      tr.innerHTML = `
-        <td><input type="text" class="generic" placeholder="Generic name" aria-label="Generic name"></td>
-        <td><input type="text" class="brand" placeholder="Brand" aria-label="Brand"></td>
-        <td><input type="number" class="qty" min="0" step="0.01" value="1" style="width:100%;" aria-label="Quantity"></td>
-        <td>
-          <select class="unit" aria-label="Unit">
-            <option value="pcs">Pcs</option>
-            <option value="box">Box</option>
-            <option value="pfs">Pfs</option>
-            <option value="vial">Vial</option>
-          </select>
-        </td>
-        <td><input type="number" class="srp" min="0" step="0.01" value="0" aria-label="SRP"></td>
-        <td>
-          <select class="discountType" aria-label="Discount type">
-            <option value="percent">%</option>
-            <option value="amount">Fixed Amount</option>
-            <option value="nodisc">No Discount</option>
-          </select>
-        </td>
-        <td><input type="number" class="discount" min="0" step="0.01" value="0" aria-label="Discount value"></td>
-        <td><input type="number" class="discountAmt" readonly aria-label="Discount amount"></td>
-        <td><input type="number" class="nodisc" readonly aria-label="No discount total"></td>
-        <td class="remarksCol"><input type="text" class="remarksItem" placeholder="Remarks" aria-label="Remarks"></td>
-        <td><input type="number" class="total" readonly aria-label="Row total"></td>
-        <td><button type="button" class="btn small btn-danger deleteRow" style="background:#dc3545; color:#fff; border-radius:6px; padding:6px 8px;">❌</button></td>
-      `;
-
-      // Append and set up listeners
-      orderBody.appendChild(tr);
-
-      // Attach listeners to inputs in the row to update totals live
-      tr.querySelectorAll('input, select').forEach(el => {
-        el.addEventListener('input', updateTotals);
-        el.addEventListener('change', updateTotals);
-      });
-
-      // Delete row handler
-      const delBtn = tr.querySelector('.deleteRow');
-      delBtn.addEventListener('click', () => {
-        tr.remove();
-        updateTotals();
-      });
-
-      // Ensure totals update with this new row
-      updateTotals();
+    // Utilities
+    function escapeHtml(s){
+      return String(s||'').replace(/[&<>\"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
-    clearItemsBtn.addEventListener('click', () => {
-      if (!confirm('Clear all items?')) return;
-      orderBody.innerHTML = '';
-      addRow();
-      updateTotals();
-    });
-
-    function updateTotals() {
-      // We must be careful and compute digit-by-digit to avoid floating point issues in presentation
-      // But here we will compute using Number and toFixed for display — this keeps clarity for user input
-      let grand = 0;
-      const rows = orderBody.querySelectorAll('tr');
-
-      rows.forEach(row => {
-        const qty = parseFloat(row.querySelector('.qty').value) || 0;
-        const srp = parseFloat(row.querySelector('.srp').value) || 0;
-        const discType = row.querySelector('.discountType').value;
-        const discVal = parseFloat(row.querySelector('.discount').value) || 0;
-
-        // noDiscount total
-        const noDisc = qty * srp;
-
-        // compute discount amount
-        let discAmt = 0;
-        if (discType === 'percent') {
-          discAmt = noDisc * (discVal / 100);
-        } else if (discType === 'amount') {
-          discAmt = discVal;
-        } else {
-          discAmt = 0;
-        }
-
-        // ensure non-negative
-        let total = noDisc - discAmt;
-        if (!isFinite(total) || total < 0) total = 0;
-
-        // set display fields with 2 decimal places
-        const discountAmtField = row.querySelector('.discountAmt');
-        const nodiscField = row.querySelector('.nodisc');
-        const totalFieldRow = row.querySelector('.total');
-
-        if (discountAmtField) discountAmtField.value = Number(discAmt).toFixed(2);
-        if (nodiscField) nodiscField.value = Number(noDisc).toFixed(2);
-        if (totalFieldRow) totalFieldRow.value = Number(total).toFixed(2);
-
-        grand += total;
-      });
-
-      // display grand total in the summary field
-      totalField.value = Number(grand).toFixed(2);
+    // Save/Render products
+    function saveProducts(){
+      localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+      renderProducts();
+      renderRows(); // update dropdowns if products changed
+      computeAll();
     }
 
-    addRowBtn.addEventListener('click', addRow);
-
-    /* -------------------- Save booking -------------------- */
-    saveBookingBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-
-      // gather items
-      const items = [];
-      orderBody.querySelectorAll('tr').forEach(row => {
-        items.push({
-          generic: row.querySelector('.generic').value || '',
-          brand: row.querySelector('.brand').value || '',
-          qty: row.querySelector('.qty').value || 0,
-          unit: row.querySelector('.unit').value || '',
-          srp: row.querySelector('.srp').value || 0,
-          discountType: row.querySelector('.discountType').value || '',
-          discount: row.querySelector('.discount').value || 0,
-          discountAmt: row.querySelector('.discountAmt').value || 0,
-          total: row.querySelector('.total').value || 0,
-          remarks: row.querySelector('.remarksItem').value || ''
-        });
-      });
-
-      const paymentType = (paymentSelect.value === 'Terms') ? `Terms (${termsDaysInput.value || '0'} days)` :
-                          (paymentSelect.value === 'Bank') ? `Bank - ${bankNameInput.value || ''}` :
-                          paymentSelect.value;
-
-      // timestamp
-      const createdAt = new Date().toLocaleString();
-
-      const record = {
-        name: nameInput.value || '',
-        contact: contactInput.value || '',
-        delivery: deliveryInput.value || '',
-        address: addressInput.value || '',
-        date: dateInput.value || '',
-        time: timeInput.value || '',
-        payment: paymentType,
-        distributor: distributorInput.value || '',
-        remarks: remarksInput.value || '',
-        total: totalField.value || '0.00',
-        items: items,
-        createdAt: createdAt,
-        processedBy: processedByInput.value || ''
-      };
-
-      // save to localStorage
-      const records = JSON.parse(localStorage.getItem('bookings')) || [];
-      records.push(record);
-      localStorage.setItem('bookings', JSON.stringify(records));
-
-      // reset form but leave UI stable
-      document.getElementById('bookingForm').reset();
-      orderBody.innerHTML = '';
-      addRow();
-      updateTotals();
-      totalField.value = '';
-
-      // reload list
-      loadRecords();
-
-      // focus name for quick next entry
-      nameInput.focus();
-    });
-
-    /* -------------------- Load records to UI -------------------- */
-    function loadRecords(filter = '') {
-      const records = JSON.parse(localStorage.getItem('bookings')) || [];
-      recordList.innerHTML = '';
-      
-      if (records.length === 0) {
-        recordList.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px;">No bookings yet.</p>';
-        return;
-      }
-
-      // Filter records if search term is provided
-      const filteredRecords = filter 
-        ? records.filter(rec => rec.name.toLowerCase().includes(filter.toLowerCase()))
-        : records;
-
-      if (filteredRecords.length === 0) {
-        recordList.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px;">No matching records found.</p>';
-        return;
-      }
-
-      filteredRecords.forEach((rec, idx) => {
-        const div = document.createElement('div');
-        div.className = 'record';
-
-        // Build inner HTML for record (escape HTML)
-        div.innerHTML = `
-          <h4>${escapeHtml(rec.name)} - ₱${escapeHtml(rec.total)}</h4>
-          <p>📞 ${escapeHtml(rec.contact)}<br>
-             🚚 ${escapeHtml(rec.delivery)}<br>
-             💳 ${escapeHtml(rec.payment)}<br>
-             🏢 ${escapeHtml(rec.distributor)}<br>
-             📍 ${escapeHtml(rec.address || 'N/A')}<br>
-             🕒 Created: ${escapeHtml(rec.createdAt || 'N/A')}</p>
-          <p><b>Remarks:</b> ${escapeHtml(rec.remarks || 'None')}</p>
-          <p><b>👤 Processed by:</b> ${escapeHtml(rec.processedBy || 'N/A')}</p>
-
-          <div style="margin-top:8px;">
-            <button class="btn" onclick="downloadExcel(${idx})">📄 Export Excel</button>
-            <button class="btn" onclick="downloadJPEG(${idx})">🖼 Download JPEG</button>
-            <button class="btn" onclick="downloadTXT(${idx})">📝 Export TXT</button>
-            <button class="btn danger" style="background:var(--danger)" onclick="deleteRecord(${idx})">🗑 Delete</button>
+    function renderProducts(){
+      productList.innerHTML = '';
+      products.forEach((p, idx) => {
+        const el = document.createElement('div');
+        el.className = 'item';
+        el.innerHTML = `
+          <input type="checkbox" data-index="${idx}" />
+          <div class="title">
+            <div style="font-weight:700">${escapeHtml(p.name)}</div>
+            <div class="muted-sm">₱ ${fmt(p.price)}</div>
           </div>
-
-          <details style="margin-top:10px;">
-            <summary style="cursor:pointer;">View Items (${rec.items.length})</summary>
-            <div style="overflow:auto; margin-top:8px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Disc Type</th><th>Disc Val</th><th>Disc Amt</th><th>Total</th><th>Remarks</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${rec.items.map(item => `
-                    <tr>
-                      <td>${escapeHtml(item.generic)}</td>
-                      <td>${escapeHtml(item.brand)}</td>
-                      <td>${escapeHtml(item.qty)}</td>
-                      <td>${escapeHtml(item.unit)}</td>
-                      <td>${escapeHtml(item.srp)}</td>
-                      <td>${escapeHtml(item.discountType)}</td>
-                      <td>${escapeHtml(item.discount)}</td>
-                      <td>${escapeHtml(item.discountAmt)}</td>
-                      <td>${escapeHtml(item.total)}</td>
-                      <td>${escapeHtml(item.remarks)}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          </details>
+          <div style="margin-left:8px; display:flex;flex-direction:column;gap:6px">
+            <button class="btn ghost small" data-edit="${idx}">Edit</button>
+          </div>
         `;
-        recordList.appendChild(div);
+        productList.appendChild(el);
+      });
+      totalCount.textContent = products.length;
+
+      // edit handlers
+      productList.querySelectorAll('[data-edit]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const i = Number(btn.getAttribute('data-edit'));
+          productName.value = products[i].name;
+          productPrice.value = products[i].price;
+          addUpdateBtn.dataset.editIndex = i;
+          addUpdateBtn.textContent = 'Update';
+        });
       });
     }
 
-    /* -------------------- Delete record -------------------- */
-    function deleteRecord(index) {
-      const records = JSON.parse(localStorage.getItem('bookings')) || [];
-      if (!records[index]) return;
-      if (!confirm('Delete this booking?')) return;
-      records.splice(index, 1);
-      localStorage.setItem('bookings', JSON.stringify(records));
-      loadRecords();
+    addUpdateBtn.addEventListener('click', ()=>{
+      const name = productName.value.trim();
+      const price = parseFloat(productPrice.value) || 0;
+      if(!name){ alert('Enter product name'); return; }
+      if(addUpdateBtn.dataset.editIndex !== undefined){
+        const idx = Number(addUpdateBtn.dataset.editIndex);
+        products[idx] = { name, price };
+        delete addUpdateBtn.dataset.editIndex;
+        addUpdateBtn.textContent = 'Add / Update';
+      } else {
+        products.push({ name, price });
+      }
+      productName.value = '';
+      productPrice.value = '';
+      saveProducts();
+    });
+
+    deleteSelectedBtn && deleteSelectedBtn.addEventListener('click', ()=>{
+      const boxes = Array.from(productList.querySelectorAll('input[type=checkbox]'));
+      const removeIdx = boxes.filter(b=>b.checked).map(b=>Number(b.dataset.index)).sort((a,b)=>b-a);
+      if(removeIdx.length===0){ alert('No selection'); return; }
+      for(const i of removeIdx) products.splice(i,1);
+      saveProducts();
+    });
+
+    clearAllBtn.addEventListener('click', ()=>{
+      if(confirm('Clear all products?')){
+        products = [];
+        saveProducts();
+      }
+    });
+
+    // Per-sheet computation
+    function computePerSheet(price, pcs){
+      const p = Number(price) || 0;
+      const q = Number(pcs);
+      if(!q || q <= 0) return 0;
+      return p / q;
     }
-    window.deleteRecord = deleteRecord; // expose to inline onclick
 
-    /* -------------------- Export Excel -------------------- */
-    function downloadExcel(index) {
-      const records = JSON.parse(localStorage.getItem('bookings')) || [];
-      const rec = records[index];
-      if (!rec) return alert('Record not found.');
-
-      // Prepare worksheet data as array of arrays
-      const wsData = [
-        ['Booking for', rec.name],
-        ['Contact', rec.contact],
-        ['Delivery', rec.delivery],
-        ['Address', rec.address || 'N/A'],
-        ['Preferred Date & Time', `${rec.date} ${rec.time}`],
-        ['Payment', rec.payment],
-        ['Distributor', rec.distributor],
-        ['Remarks', rec.remarks || 'None'],
-        ['Processed By', rec.processedBy || 'N/A'],
-        ['Created At', rec.createdAt || 'N/A'],
-        [],
-        ['Generic','Brand','Qty','Unit','SRP','Discount Type','Discount Value','Discount Amt','Total','Remarks']
-      ];
-
-      rec.items.forEach(item => {
-        wsData.push([
-          item.generic, item.brand, item.qty, item.unit, item.srp,
-          item.discountType, item.discount, item.discountAmt, item.total, item.remarks
-        ]);
-      });
-
-      wsData.push(['','','','','','','','','Total Amount', rec.total]);
-
-      // create workbook & worksheet
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-      // auto column width (simple heuristic)
-      const headerRowIndex = 10;
-      const colWidths = wsData[headerRowIndex].map((_, i) => {
-        const max = Math.max(...wsData.map(r => (r[i] ? String(r[i]).length : 0)));
-        return { wch: Math.min(Math.max(max + 2, 10), 40) };
-      });
-      ws['!cols'] = colWidths;
-
-      XLSX.utils.book_append_sheet(wb, ws, 'Booking');
-      const safeName = (rec.name || 'Booking').replace(/[\\\\/:*?\"<>|]/g, '_');
-      const filename = `Booking_${safeName}_${(rec.date || '')}.xlsx`;
-      XLSX.writeFile(wb, filename);
+    // Save rows
+    function saveRows(){
+      localStorage.setItem(ROWS_KEY, JSON.stringify(rows));
+      computeAll();
     }
-    window.downloadExcel = downloadExcel;
 
-    /* -------------------- Export JPEG (centered with margin) -------------------- */
-    async function downloadJPEG(index) {
-      const records = JSON.parse(localStorage.getItem('bookings')) || [];
-      const rec = records[index];
-      if (!rec) return alert('Record not found.');
-
-      // Create export wrapper and centered card (this will be rendered by html2canvas)
-      const wrapper = document.createElement('div');
-      wrapper.className = 'export-wrapper';
-
-      // Offscreen but still renderable — keep it accessible to html2canvas
-      wrapper.style.position = 'fixed';
-      wrapper.style.left = '-9999px'; // place offscreen to avoid flicker on UI
-      wrapper.style.top = '0';
-      wrapper.style.zIndex = 99999;
-
-      // Outer margin to ensure white space around content when rendered
-      // This outer padding acts as the "white border" you requested
-      wrapper.style.padding = '48px'; // <-- adjust this value for thicker/thinner border
-      wrapper.style.background = '#ffffff';
-
-      const card = document.createElement('div');
-      card.className = 'export-card';
-
-      // Compose HTML for export card (centered and fixed width)
-      card.innerHTML = `
-        <h2>📦 Booking Summary</h2>
-        <p><b>Booking for:</b> ${escapeHtml(rec.name)}</p>
-        <p><b>Contact:</b> ${escapeHtml(rec.contact)}</p>
-        <p><b>Delivery:</b> ${escapeHtml(rec.delivery)}</p>
-        <p><b>Address:</b> ${escapeHtml(rec.address || 'N/A')}</p>
-        <p><b>Preferred Date & Time:</b> ${escapeHtml(rec.date)} ${escapeHtml(rec.time)}</p>
-        <p><b>Payment:</b> ${escapeHtml(rec.payment)}</p>
-        <p><b>Distributor:</b> ${escapeHtml(rec.distributor)}</p>
-        <p><b>Remarks / Special Instructions:</b> ${escapeHtml(rec.remarks || 'None')}</p>
-        <p><b>Created At:</b> ${escapeHtml(rec.createdAt || 'N/A')}</p>
-        <br>
-        <table class="export-table" role="table" aria-label="items">
-          <thead>
-            <tr>
-              <th>Generic</th><th>Brand</th><th>Qty</th><th>Unit</th><th>SRP</th><th>Disc Type</th><th>Disc Val</th><th>Disc Amt</th><th>Total</th><th>Remarks</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rec.items.map(it => `
-              <tr>
-                <td>${escapeHtml(it.generic)}</td>
-                <td>${escapeHtml(it.brand)}</td>
-                <td>${escapeHtml(it.qty)}</td>
-                <td>${escapeHtml(it.unit)}</td>
-                <td>${escapeHtml(it.srp)}</td>
-                <td>${escapeHtml(it.discountType)}</td>
-                <td>${escapeHtml(it.discount)}</td>
-                <td>${escapeHtml(it.discountAmt)}</td>
-                <td>${escapeHtml(it.total)}</td>
-                <td style="white-space:normal; word-wrap:break-word; max-width:200px; text-align:left;">${escapeHtml(it.remarks)}</td>
-              </tr>
-            `).join('')}
-            <tr>
-              <td colspan="8" style="text-align:right; font-weight:bold;">Total Amount</td>
-              <td colspan="2" style="font-weight:bold;">₱${escapeHtml(rec.total)}</td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="export-footer">Generated by Booking App</div>
-        <div style="margin-top:8px; text-align:center; font-size:13px; color:#333;"><strong>Processed by:</strong> ${escapeHtml(rec.processedBy || 'N/A')}</div>
-      `;
-
-      // Append card to wrapper and wrapper to body
-      wrapper.appendChild(card);
-      document.body.appendChild(wrapper);
-
-      try {
-        // Determine scale for crispness (especially on Retina displays)
-        const scale = Math.min(3, Math.max(2, window.devicePixelRatio || 1));
-
-        // Use html2canvas on the wrapper so the outer padding is included (white border)
-        const canvas = await html2canvas(wrapper, {
-          scale: scale,
-          backgroundColor: '#ffffff',
-          useCORS: true,
-          // allowTaint: true // optional if you are using images from other domains
+    // Render rows
+    function renderRows(){
+      rowsContainer.innerHTML = '';
+      rows.forEach((r, i) => {
+        const row = document.createElement('div');
+        row.className = 'calc-row';
+        let options = '<option value="">Select product</option>';
+        products.forEach((p, idx)=> {
+          options += `<option value="${idx}" ${r.materialId===idx?'selected':''}>${escapeHtml(p.name)}</option>`;
         });
 
-        // convert canvas to blob for robust handling and sharing
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
-        if (!blob) throw new Error('Failed to create image blob.');
-
-        const safeName = (rec.name || 'Booking').replace(/[\\\\/:*?\"<>|]/g, '_');
-        const filename = `Booking_${safeName}_${(rec.date || '')}.jpeg`;
-
-        // Try Web Share API (files) first — best UX on mobile (especially iOS)
-        try {
-          const file = new File([blob], filename, { type: 'image/jpeg' });
-
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            // Use navigator.share to open native share sheet if supported
-            await navigator.share({
-              files: [file],
-              title: filename,
-              text: `Booking: ${rec.name} — ${rec.date || ''}`
-            });
-            // remove wrapper and return
-            if (wrapper.parentNode) document.body.removeChild(wrapper);
-            return;
-          }
-        } catch (shareErr) {
-          // If share fails or the browser doesn't allow it, continue to fallback download
-          console.warn('Share API unavailable or failed — falling back to download.', shareErr);
-        }
-
-        // Fallback: create object URL and trigger anchor download
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-
-        // Append anchor and simulate click
-        document.body.appendChild(a);
-        a.click();
-
-        // cleanup
-        setTimeout(() => {
-          URL.revokeObjectURL(url);
-          if (a.parentNode) a.parentNode.removeChild(a);
-        }, 1000);
-
-        // Remove wrapper now that export is done
-        if (wrapper.parentNode) document.body.removeChild(wrapper);
-      } catch (err) {
-        // Ensure wrapper is removed on error
-        if (wrapper.parentNode) document.body.removeChild(wrapper);
-        console.error('Export to JPEG failed:', err);
-        alert('Image export failed: ' + (err && err.message ? err.message : err));
-      }
-    }
-    window.downloadJPEG = downloadJPEG;
-
-    /* -------------------- Export TXT (cleaned up with proper bullet points) -------------------- */
-    function downloadTXT(index) {
-      const records = JSON.parse(localStorage.getItem('bookings')) || [];
-      const rec = records[index];
-      if (!rec) return alert('Record not found.');
-
-      let txt = '';
-      txt += `📦 BOOKING SUMMARY\n`;
-      txt += `=====================================================\n\n`;
-
-      txt += `• Name of Account (MD/Patient): ${rec.name}\n`;
-      txt += `• Contact Number: ${rec.contact}\n`;
-      txt += `• Delivery Option: ${rec.delivery}\n`;
-      txt += `• Address: ${rec.address || 'N/A'}\n`;
-      txt += `• Preferred Date & Time: ${rec.date} ${rec.time}\n`;
-      txt += `• Payment Option: ${rec.payment}\n`;
-      txt += `• Distributor & Branch: ${rec.distributor}\n`;
-      txt += `• Processed By: ${rec.processedBy || 'N/A'}\n`;
-      txt += `• Created At: ${rec.createdAt}\n`;
-      txt += `• Remarks / Special Instructions: ${rec.remarks || 'None'}\n`;
-
-      txt += `\n🧾 ORDER DETAILS\n`;
-      txt += `-----------------------------------------------------\n`;
-
-      rec.items.forEach((it, i) => {
-        txt += `  ${i + 1}. ${it.generic || 'N/A'} (${it.brand || 'No Brand'})\n`;
-        txt += `     - Qty: ${it.qty} ${it.unit}\n`;
-        txt += `     - SRP: ₱${it.srp}\n`;
-        txt += `     - Discount: ${it.discountType} (${it.discount})\n`;
-        txt += `     - Discount Amount: ₱${it.discountAmt}\n`;
-        txt += `     - Total: ₱${it.total}\n`;
-        if (it.remarks) txt += `     - Remarks: ${it.remarks}\n`;
-        txt += `\n`;
+        row.innerHTML = `
+          <select class="col-material" data-i="${i}">${options}</select>
+          <input class="col-pcs" data-i="${i}" type="number" min="0" placeholder="PCS" value="${r.pcs===undefined||r.pcs===''? '': r.pcs}" />
+          <input class="col-desc" data-i="${i}" type="text" placeholder="description" value="${escapeHtml(r.desc||'')}" />
+          <input class="col-price" data-i="${i}" type="number" step="0.01" placeholder="Price" value="${r.price||0}" />
+          <div class="col-per">₱ <span class="per">${fmt(computePerSheet(r.price, r.pcs))}</span></div>
+          <div class="row-actions">
+            <button data-save="${i}" title="Save">Save</button>
+            <button data-delete="${i}" title="Delete">Delete</button>
+          </div>
+        `;
+        rowsContainer.appendChild(row);
       });
 
-      txt += `-----------------------------------------------------\n`;
-      txt += `TOTAL AMOUNT: ₱${rec.total}\n`;
-      txt += `=====================================================\n`;
-      txt += `Generated by Booking App\n`;
+      // Attach handlers after DOM created
 
-      // create and download blob
-      const blob = new Blob([txt], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const safeName = (rec.name || 'Booking').replace(/[\\/:*?"<>|]/g, '_');
-      const filename = `Booking_${safeName}_${(rec.date || '')}.txt`;
+      // Save per-row
+      rowsContainer.querySelectorAll('[data-save]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const i = Number(btn.getAttribute('data-save'));
+          const container = btn.closest('.calc-row');
+          const matSel = container.querySelector('select').value;
+          const pcsVal = container.querySelector('.col-pcs').value;
+          const descVal = container.querySelector('.col-desc').value.trim();
+          const priceVal = Number(container.querySelector('.col-price').value) || 0;
 
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        URL.revokeObjectURL(url);
-        a.remove();
-      }, 1000);
+          rows[i].pcs = pcsVal === '' ? '' : Number(pcsVal);
+          rows[i].desc = descVal;
+          rows[i].price = priceVal;
+          rows[i].materialId = matSel === '' ? null : Number(matSel);
+          rows[i].name = (rows[i].materialId != null && products[rows[i].materialId]) ? products[rows[i].materialId].name : (rows[i].name || '');
+          // If product selected, override price with product price
+          if(rows[i].materialId != null && products[rows[i].materialId]){
+            rows[i].price = products[rows[i].materialId].price;
+          }
+          saveRows();
+          renderRows(); // re-render to reflect possible autofill
+        });
+      });
+
+      // Delete per-row
+      rowsContainer.querySelectorAll('[data-delete]').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const i = Number(btn.getAttribute('data-delete'));
+          if(confirm('Delete this material row?')){
+            rows.splice(i,1);
+            saveRows();
+            renderRows();
+          }
+        });
+      });
+
+      // Material select change -> autofill name & price and save
+      rowsContainer.querySelectorAll('select').forEach(sel=>{
+        sel.addEventListener('change', (e)=>{
+          const idx = Number(sel.dataset.i);
+          const val = sel.value;
+          if(val !== ''){
+            rows[idx].materialId = Number(val);
+            rows[idx].name = products[val].name;
+            rows[idx].price = products[val].price;
+          } else {
+            rows[idx].materialId = null;
+            rows[idx].name = '';
+            rows[idx].price = 0;
+          }
+          saveRows();
+          renderRows();
+        });
+      });
+
+      // Live per-sheet update on pcs/price input
+      rowsContainer.querySelectorAll('.col-pcs, .col-price').forEach(inp=>{
+        inp.addEventListener('input', (e)=>{
+          const container = e.target.closest('.calc-row');
+          const priceVal = Number(container.querySelector('.col-price').value) || 0;
+          const pcsVal = container.querySelector('.col-pcs').value;
+          const perEl = container.querySelector('.per');
+          if(perEl) perEl.textContent = fmt(computePerSheet(priceVal, pcsVal));
+        });
+      });
     }
-    window.downloadTXT = downloadTXT;
 
-    /* -------------------- helpers -------------------- */
+    // Compute totals and markups
+    function computeAll(){
+      let total = 0;
+      rows.forEach((r, i)=>{
+        total += Number(r.price || 0);
+        const per = computePerSheet(r.price, r.pcs);
+        const el = rowsContainer.querySelectorAll('.per')[i];
+        if(el) el.textContent = fmt(per);
+      });
 
-    // escapeHtml - prevent HTML injection when rendering user-provided strings
-    function escapeHtml(str) {
-      if (str === null || str === undefined) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+      const taxPercent = Number(taxPercentInput.value) || 0;
+      const taxAmount = (total * taxPercent) / 100;
+      materialsTotalEl.textContent = fmt(total);
+      taxAmountEl.textContent = fmt(taxAmount);
+      totalWithTaxEl.textContent = fmt(total + taxAmount);
+
+      computeMarkupForAll();
     }
 
-    /* -------------------- Dark Mode Toggle -------------------- */
-    darkModeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark-mode');
-      localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
-    });
-
-    // Check for saved preference
-    if (localStorage.getItem('darkMode') === 'true') {
-      document.body.classList.add('dark-mode');
-    }
-
-    /* -------------------- Update Current Date and Time -------------------- */
-    function updateDateTime() {
-      const now = new Date();
-      const options = { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      };
-      const formattedDate = now.toLocaleDateString('en-US', options);
-      
-      // Update the datetime display with better formatting
-      currentDateTimeElement.innerHTML = `
-        <strong>${formattedDate.split(',')[0]}</strong>
-        <span>${formattedDate.split(',')[1]}</span>
-      `;
-    }
-
-    // Update immediately and then every second
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
-
-    /* -------------------- Search Functionality -------------------- */
-    searchButton.addEventListener('click', () => {
-      loadRecords(searchInput.value);
-    });
-
-    searchInput.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') {
-        loadRecords(searchInput.value);
+    // Markup computations use Per Sheet value
+    function computeMarkupForAll(){
+      markupContainer.innerHTML = '';
+      if(rows.length === 0){
+        markupContainer.innerHTML = '<div class="muted-sm">No rows to compute</div>';
+        return;
       }
+      rows.forEach((r, i)=>{
+        const perSheet = computePerSheet(r.price, r.pcs);
+        const m10 = perSheet * 1.10;
+        const m20 = perSheet * 1.20;
+        const m30 = perSheet * 1.30;
+        const div = document.createElement('div');
+        div.className = 'markup-item';
+        div.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong>Row ${i+1}:</strong> ${escapeHtml(r.name || '(no name)')}</div>
+            <div class="muted-sm">Per sheet: ₱ ${fmt(perSheet)}</div>
+          </div>
+          <div style="margin-top:6px">
+            <div>10% → ₱ ${fmt(m10)}</div>
+            <div>20% → ₱ ${fmt(m20)}</div>
+            <div>30% → ₱ ${fmt(m30)}</div>
+          </div>
+        `;
+        markupContainer.appendChild(div);
+      });
+    }
+
+    // Add row
+    addRowBtn.addEventListener('click', ()=>{
+      rows.push({ name:'', pcs:'', desc:'', price:0, materialId:null });
+      renderRows();
+      saveRows();
     });
 
-    /* -------------------- Keyboard Shortcuts -------------------- */
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.key === 'Enter') {
-        saveBookingBtn.click();
-      }
-      if (e.key === 'Escape') {
-        document.getElementById('bookingForm').reset();
-        orderBody.innerHTML = '';
-        addRow();
-        updateTotals();
-      }
-    });
+    // Tax percent change
+    taxPercentInput.addEventListener('input', computeAll);
 
-    /* -------------------- initial load -------------------- */
-    // Populate the saved records list from localStorage when the page loads.
-    loadRecords();
+    // Initialize arrays if invalid
+    if(!Array.isArray(products)) products = [];
+    if(!Array.isArray(rows)) rows = [];
 
-    // End of script
+    // Initial render
+    renderProducts();
+    renderRows();
+    computeAll();
   </script>
-
-  <!-- End of body -->
 </body>
 </html>
